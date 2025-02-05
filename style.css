@@ -1,0 +1,112 @@
+/* Game Container Styles */
+.game-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+/* Game Header Styles */
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.score-panel,
+.game-stats {
+  background: #333;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+}
+
+/* Game Board Styles */
+#game-board {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(17, 1fr);
+  grid-template-rows: repeat(13, 1fr);
+  gap: 0;
+  border: 2px solid #333;
+  background-color: #8bac0f;
+}
+
+/* Cell Types */
+.cell {
+  aspect-ratio: 1 / 1;
+  /* Ensure square cells */
+  width: 100%;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.wall {
+  background-image: url('./images/wall.png');
+}
+
+.breakable {
+  background-image: url('./images/breakable.png');
+}
+
+.empty {
+  background-image: url('./images/floor.png');
+}
+
+.player {
+  background-image: url('./images/player.png');
+}
+
+.bomb {
+  background-image: url('./images/bomb.png');
+}
+
+.explosion {
+  background-image: url('./images/explosion.png');
+}
+
+.powerup-bomb {
+  background-image: url('./images/powerup-bomb.png');
+}
+
+.powerup-flame {
+  background-image: url('./images/powerup-flame.png');
+}
+
+.powerup-speed {
+  background-image: url('./images/powerup-speed.png');
+}
+
+/* Overlay Screens */
+.overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 20px;
+  text-align: center;
+  border-radius: 10px;
+}
+
+.hidden {
+  display: none;
+}
+
+/* Buttons */
+button {
+  background: #4a90e2;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin: 10px;
+  font-size: 16px;
+}
+
+button:hover {
+  background: #357abd;
+}
