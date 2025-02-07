@@ -7,7 +7,8 @@
   --text-secondary: #cbd5e1;
   --accent-color: #10b981;
   --danger-color: #ef4444;
-  --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1),
+    0 2px 4px -2px rgb(0 0 0 / 0.1);
   --game-border-radius: 12px;
   --header-height: 80px;
   --webkit-background-clip: text;
@@ -23,7 +24,7 @@ body {
   max-height: 90vh;
   margin: 2rem auto;
   padding: 1rem;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
   background-color: var(--background-color);
   border-radius: var(--game-border-radius);
   box-shadow: 0 0 50px rgba(99, 102, 241, 0.1);
@@ -45,7 +46,11 @@ body {
 }
 
 .score-panel {
-  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  background: linear-gradient(
+    135deg,
+    var(--primary-color),
+    var(--secondary-color)
+  );
   padding: 0.5rem 1rem;
   border-radius: 8px;
   text-align: center;
@@ -109,46 +114,47 @@ body {
 }
 
 .wall {
-  background-image: url('./images/wall.png');
+  background-image: url("./images/wall.png");
 }
 
 .breakable {
-  background-image: url('./images/breakable.png');
+  background-image: url("./images/breakable.png");
 }
 
 .empty {
-  background-image: url('./images/floor.png');
+  background-image: url("./images/floor.png");
 }
 
 .player {
   z-index: 10;
-  background-image: url('./images/player.png');
-  background-color: #574C37;
+  background-image: url("./images/player.png");
+  background-color: #574c37;
 }
 
 .bomb {
-  background-image: url('./images/bomb.png');
-  background-color: #574C37;
+  background-image: url("./images/bomb.png");
+  background-color: #574c37;
   animation: pulse 1s infinite;
 }
 
 .explosion {
-  background-image: url('./images/explosion.png');
+  background-image: url("./images/explosion.png");
+  background-color: #574c37;
   animation: explode 0.5s ease-out;
 }
 
 .powerup-bomb {
-  background-image: url('./images/powerup-bomb.png');
+  background-image: url("./images/powerup-bomb.png");
   animation: float 2s infinite;
 }
 
 .enemy {
-  background-image: url('./images/enemy.png');
+  background-image: url("./images/enemy.png");
   animation: float 2s infinite;
 }
 
 .powerup-speed {
-  background-image: url('./images/powerup-speed.png');
+  background-image: url("./images/powerup-speed.png");
   animation: float 2s infinite;
 }
 
