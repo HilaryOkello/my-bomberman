@@ -13,6 +13,10 @@
   --webkit-background-clip: text;
 }
 
+body {
+  overflow-y: hidden;
+}
+
 /* Game Container Styles */
 .game-container {
   max-width: 60vw;
@@ -117,7 +121,9 @@
 }
 
 .player {
+  z-index: 10;
   background-image: url('./images/player.png');
+  background-color: #574C37;
 }
 
 .bomb {
