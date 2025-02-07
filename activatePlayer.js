@@ -1,4 +1,5 @@
 import gameBoard from "./gameBoard.js";
+import { placeBomb } from "./bombPlacement.js";
 
 class GameController {
     constructor() {
@@ -111,7 +112,7 @@ class GameController {
 
     handleKeyPress(event) {
         if (!this.isPlaying || this.isPaused) return;
-
+    
         switch (event.key) {
             case "ArrowUp":
             case "ArrowDown":
@@ -119,14 +120,11 @@ class GameController {
             case "ArrowRight":
                 this.movePlayer(event.key);
                 break;
-            case " ":
-                // Bomb placing will be implemented here
-                break;
             case "Escape":
                 this.pauseGame();
                 break;
         }
-    }
+    }    
 
     movePlayer(direction) {
         if (!this.isPlaying || this.isPaused) return;
