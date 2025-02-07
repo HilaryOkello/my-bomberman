@@ -26,7 +26,9 @@ class GameBoard {
             const row = [];
             for (let x = 0; x < this.width; x++) {
                 let cellType = this.determineInitialCellType(x, y);
-                row.push(cellType);
+                // row.push(cellType);
+                let isWalkable = cellType == 'empty';
+                row.push({ type: cellType, walkable: isWalkable});
                 this.createCell(x, y, cellType);
             }
             this.board.push(row);
@@ -90,16 +92,26 @@ class GameBoard {
 
     updateCell(x, y, newType) {
         if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
-            this.board[y][x] = newType;
-            const cellElement = this.gameElement.children[y * this.width + x];
-            cellElement.className = `cell ${newType}`;
+            // this.board[y][x] = newType;
+            let isWalkable = newType == 'empty';
+            this.board[y][x] = { type: newType, walkable: isWalkable};
+
+            // const cellElement = this.gameElement.children[y * this.width + x];
+            // cellElement.className = `cell ${newType}`;
+            const cellElement = document.querySelector(`[data-x="${x}"][data-y="${y}"]`);
+            if (cellElement) {
+                cellElement.className = `cell ${newType}`;
+            }
         }
     }
 
     // Helper method to check if a cell is walkable
+    // isWalkable(x, y) {
+    //     const cellType = this.getCellAt(x, y);
+    //     return cellType === 'empty';
+    // }
     isWalkable(x, y) {
-        const cellType = this.getCellAt(x, y);
-        return cellType === 'empty';
+        return this.board[y] && this.board[y][x].walkable;
     }
 }
 
