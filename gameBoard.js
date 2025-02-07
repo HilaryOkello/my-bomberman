@@ -99,7 +99,7 @@ class GameBoard {
     // Helper method to check if a cell is walkable
     isWalkable(x, y) {
         const cellType = this.getCellAt(x, y);
-        return cellType === 'empty' || cellType === 'powerup';
+        return cellType === 'empty';
     }
 }
 
