@@ -143,7 +143,7 @@ class GameController {
         let newCol = col + movement[direction].col;
     
         // Ensure new position is within bounds
-        if (newRow < 1 || newRow > 13 || newCol < 1 || newCol > 17) return;
+        if (newRow < 1 || newRow > 15 || newCol < 1 || newCol > 11) return;
     
         // Check if the new position is walkable before moving
         if (gameBoard.isWalkable(newRow, newCol)) {
