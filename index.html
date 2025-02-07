@@ -1,10 +1,12 @@
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bomberman</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <div class="game-container">
         <div class="game-header">
@@ -17,30 +19,31 @@
                 <div id="lives">Lives: 3</div>
                 <div id="level">Level: 1</div>
             </div>
+            <button id="pause-btn" class="pause-button">Pause</button>
             <div id="pause-screen" class="overlay hidden">
-              <h2>Game Paused</h2>
-              <button id="resume-btn">Resume</button>
-              <button id="restart-btn">Restart</button>
-          </div>
+                <h2>Game Paused</h2>
+                <button id="resume-btn">Resume</button>
+                <button id="restart-btn">Restart</button>
+            </div>
         </div>
-        
+
         <div id="game-board"></div>
-        
+
         <div class="game-controls">
             <div id="start-screen" class="overlay">
                 <h1>Bomberman</h1>
                 <p>Use Arrow Keys to Move, Space to Plant Bombs</p>
                 <button id="start-btn">Start Game</button>
             </div>
-            
-            
-            
+
+
+
             <div id="game-over-screen" class="overlay hidden">
                 <h2>Game Over</h2>
                 <p>Final Score: <span id="final-score">0</span></p>
                 <button id="restart-game-btn">Play Again</button>
             </div>
-            
+
             <div id="game-win-screen" class="overlay hidden">
                 <h2>Congratulations!</h2>
                 <p>You completed all levels!</p>
@@ -51,4 +54,5 @@
     </div>
     <script type="module" src="script.js"></script>
 </body>
+
 </html>
