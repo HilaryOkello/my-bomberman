@@ -60,16 +60,16 @@ class GameBoard {
     isPlayerSafeZone(x, y) {
         // Top-left corner (player 1)
         if (x <= 2 && y <= 2) return true;
-        
+
         // Top-right corner (player 2)
         if (x >= this.width - 3 && y <= 2) return true;
-        
+
         // Bottom-left corner (player 3)
         if (x <= 2 && y >= this.height - 3) return true;
-        
+
         // Bottom-right corner (player 4)
         if (x >= this.width - 3 && y >= this.height - 3) return true;
-        
+
         return false;
     }
 
