@@ -111,7 +111,7 @@ class GameBoard {
     //     return cellType === 'empty';
     // }
     isWalkable(x, y) {
-        return this.board[y] && this.board[y][x].walkable;
+        return this.board[y] && this.board[y][x] && this.board[y][x].walkable;
     }
 }
 
