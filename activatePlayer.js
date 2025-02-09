@@ -1,5 +1,6 @@
 import gameBoard from "./gameBoard.js";
 import { placeBomb } from "./bombPlacement.js";
+import { spawnEnemies, moveEnemies } from "./enemyPlacement.js";
 
 class GameController {
     constructor() {
@@ -69,6 +70,17 @@ class GameController {
 
         // Place player on the board
         this.updatePlayerPosition(this.playerPosition.row, this.playerPosition.col);
+
+        // Spawn enemies and start their movement
+        const enemies = spawnEnemies(4); // Spawn 4 enemies, adjust number as needed
+        moveEnemies(enemies, this.playerPosition, () => {
+            this.lives--;
+            this.livesDisplay.textContent = `Lives: ${this.lives}`;
+            if (this.lives <= 0) {
+                this.stopGame();
+                document.getElementById('game-over-screen').classList.remove('hidden');
+            }
+        });
     }
 
     pauseGame() {
