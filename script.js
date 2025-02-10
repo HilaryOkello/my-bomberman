@@ -1,26 +1,25 @@
-import gameBoard from './gameBoard.js';
-import gameController from './activatePlayer.js';
+import gameBoard from "./gameBoard.js";
+import gameController from "./activatePlayer.js";
+import { placeBomb } from "./bombPlacement.js";
 
 // Initialize when the DOM is fully loaded
-document.addEventListener('DOMContentLoaded', () => {
-    // Initialize the game board
+document.addEventListener("DOMContentLoaded", () => {
     gameBoard.initializeBoard();
-    
-    // Set up event listeners for gameplay
-    document.addEventListener('keydown', (event) => {
-        if (gameController.isPlaying && !gameController.isPaused) {
-            // Handle gameplay controls
-            switch(event.key) {
-                case 'ArrowUp':
-                case 'ArrowDown':
-                case 'ArrowLeft':
-                case 'ArrowRight':
-                    // Handle movement
-                    break;
-                case ' ':
-                    // Handle bomb placement
-                    break;
-            }
+  
+    document.addEventListener("keydown", (event) => {
+      if (gameController.isPlaying && !gameController.isPaused) {
+        switch (event.key) {
+          case "ArrowUp":
+          case "ArrowDown":
+          case "ArrowLeft":
+          case "ArrowRight":
+            // Handle movement
+            break;
+          case " ":
+            placeBomb(); 
+            break;
         }
+      }
     });
-});
+  });
+  
