@@ -10,7 +10,6 @@ export function placeBomb() {
     const bombX = gameController.playerPosition.row;
     const bombY = gameController.playerPosition.col;
 
-    console.log('Placing bomb at:', bombX, bombY); // Debugging
     const bombCell = document.querySelector(`[data-x="${bombX}"][data-y="${bombY}"]`);
 
     if (!bombCell || bombCell.classList.contains('bomb')) return;
@@ -36,11 +35,7 @@ function explodeBomb(x, y) {
         // Stop explosion if it hits an unbreakable wall
         if (targetCell.classList.contains('wall')) return;
 
-        // Handle breakable walls (remove them)
-        if (targetCell.classList.contains('breakable')) {
-            targetCell.classList.remove('breakable');
-            gameBoard.updateCell(cell.x, cell.y, 'empty');
-        }
+
 
         // Apply explosion effect with correct image
         targetCell.classList.add('explosion');
@@ -65,6 +60,11 @@ function explodeBomb(x, y) {
 
         // Remove explosion effect after 500ms
         setTimeout(() => {
+            // Handle breakable walls (remove them)
+            if (targetCell.classList.contains('breakable')) {
+                targetCell.classList.remove('breakable');
+                gameBoard.updateCell(cell.x, cell.y, 'empty');
+            }
             targetCell.classList.remove('explosion');
             targetCell.style.backgroundImage = "";
             gameBoard.updateCell(cell.x, cell.y, 'empty');
