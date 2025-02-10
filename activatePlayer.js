@@ -1,4 +1,6 @@
 import gameBoard from "./gameBoard.js";
+import { placeBomb } from "./bombPlacement.js";
+import { spawnEnemies, moveEnemies } from "./enemyPlacement.js";
 
 class GameController {
     constructor() {
@@ -68,6 +70,17 @@ class GameController {
 
         // Place player on the board
         this.updatePlayerPosition(this.playerPosition.row, this.playerPosition.col);
+
+        // Spawn enemies and start their movement
+        const enemies = spawnEnemies(4); // Spawn 4 enemies, adjust number as needed
+        moveEnemies(enemies, this.playerPosition, () => {
+            this.lives--;
+            this.livesDisplay.textContent = `Lives: ${this.lives}`;
+            if (this.lives <= 0) {
+                this.stopGame();
+                document.getElementById('game-over-screen').classList.remove('hidden');
+            }
+        });
     }
 
     pauseGame() {
@@ -111,7 +124,7 @@ class GameController {
 
     handleKeyPress(event) {
         if (!this.isPlaying || this.isPaused) return;
-
+    
         switch (event.key) {
             case "ArrowUp":
             case "ArrowDown":
@@ -119,14 +132,11 @@ class GameController {
             case "ArrowRight":
                 this.movePlayer(event.key);
                 break;
-            case " ":
-                // Bomb placing will be implemented here
-                break;
             case "Escape":
                 this.pauseGame();
                 break;
         }
-    }
+    }    
 
     movePlayer(direction) {
         if (!this.isPlaying || this.isPaused) return;
@@ -145,7 +155,7 @@ class GameController {
         let newCol = col + movement[direction].col;
     
         // Ensure new position is within bounds
-        if (newRow < 1 || newRow > 13 || newCol < 1 || newCol > 17) return;
+        if (newRow < 1 || newRow > 15 || newCol < 1 || newCol > 11) return;
     
         // Check if the new position is walkable before moving
         if (gameBoard.isWalkable(newRow, newCol)) {
