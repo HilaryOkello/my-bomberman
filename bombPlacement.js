@@ -10,7 +10,6 @@ export function placeBomb() {
     const bombX = gameController.playerPosition.row;
     const bombY = gameController.playerPosition.col;
 
-    console.log('Placing bomb at:', bombX, bombY); // Debugging
     const bombCell = document.querySelector(`[data-x="${bombX}"][data-y="${bombY}"]`);
 
     if (!bombCell || bombCell.classList.contains('bomb')) return;
@@ -22,51 +21,70 @@ export function placeBomb() {
 
 function explodeBomb(x, y) {
     const explosionCells = [
-        { x: x, y: y }, // Center explosion
-        { x: x + 1, y: y }, // Right
-        { x: x - 1, y: y }, // Left
-        { x: x, y: y + 1 }, // Down
-        { x: x, y: y - 1 }  // Up
+        { x: x, y: y, type: 'center' },
+        { x: x + 1, y: y, type: 'horizontal' },
+        { x: x - 1, y: y, type: 'horizontal' },
+        { x: x, y: y + 1, type: 'vertical' },
+        { x: x, y: y - 1, type: 'vertical' }
     ];
 
     explosionCells.forEach(cell => {
-        const cellType = gameBoard.getCellAt(cell.x, cell.y);
-        if (!cellType) return;
-
         const targetCell = document.querySelector(`[data-x="${cell.x}"][data-y="${cell.y}"]`);
         if (!targetCell) return;
 
-        if (targetCell.classList.contains('breakable')) {
-            targetCell.classList.remove('breakable');
-            targetCell.classList.add('explosion');
+        // Stop explosion if it hits an unbreakable wall
+        if (targetCell.classList.contains('wall')) return;
 
-            setTimeout(() => {
-                targetCell.classList.remove('explosion');
-                targetCell.classList.add('empty');
 
-                gameBoard.updateCell(cell.x, cell.y, 'empty');
-            }, 500);
+
+        // Apply explosion effect with correct image
+        targetCell.classList.add('explosion');
+
+        if (cell.type === 'center') {
+            targetCell.style.backgroundImage = "url('./images/explosion_base.png')";
+        } else if (cell.type === 'horizontal') {
+            targetCell.style.backgroundImage = "url('./images/explosion_horizontal.png')";
+        } else if (cell.type === 'vertical') {
+            targetCell.style.backgroundImage = "url('./images/explosion_vertical.png')";
         }
 
+        // Handle player hit
         if (targetCell.classList.contains('player')) {
             reducePlayerLives();
         }
+
+        // Handle enemy hit (if applicable)
+        if (targetCell.classList.contains('enemy')) {
+            targetCell.classList.remove('enemy');
+        }
+
+        // Remove explosion effect after 500ms
+        setTimeout(() => {
+            // Handle breakable walls (remove them)
+            if (targetCell.classList.contains('breakable')) {
+                targetCell.classList.remove('breakable');
+                gameBoard.updateCell(cell.x, cell.y, 'empty');
+            }
+            targetCell.classList.remove('explosion');
+            targetCell.style.backgroundImage = "";
+            gameBoard.updateCell(cell.x, cell.y, 'empty');
+        }, 500);
     });
 
-    // Handle bomb explosion and animation
+    // Remove bomb itself
     const bombCell = document.querySelector(`[data-x="${x}"][data-y="${y}"]`);
     if (bombCell) {
         bombCell.classList.remove('bomb');
         bombCell.classList.add('explosion');
+        bombCell.style.backgroundImage = "url('./images/explosion_base.png')";
 
         setTimeout(() => {
             bombCell.classList.remove('explosion');
-            bombCell.classList.add('empty');
+            bombCell.style.backgroundImage = "";
             gameBoard.updateCell(x, y, 'empty');
-        }, 500);
+        }, 2000);
     }
 }
-
 
 function reducePlayerLives() {
     let livesElement = document.getElementById('lives');
@@ -81,7 +99,6 @@ function reducePlayerLives() {
         gameOver();
     }
 }
-
 
 function gameOver() {
     document.getElementById('game-over-screen').classList.remove('hidden');
