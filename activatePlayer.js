@@ -10,8 +10,8 @@ class GameController {
         this.lives = 3;
         this.level = 1;
         this.time = 0;
-        this.enemyCount = 0;
-        this.gameTimer = null;
+        this.enemyCount = 4;
+        this.gameTimer = null;2
         this.playerPosition = { row: 1, col: 1 }; // Initial player position
 
         // Get DOM elements
@@ -75,8 +75,7 @@ class GameController {
         this.updatePlayerPosition(this.playerPosition.row, this.playerPosition.col);
 
         // Spawn enemies and start their movement
-        this.enemyCount = 4
-        const enemies = spawnEnemies(this.enemyCount); // Spawn 4 enemies, adjust number as needed
+        const enemies = spawnEnemies(this.enemyCount);
         moveEnemies(enemies, this.playerPosition, () => {
             this.lives--;
             this.livesDisplay.textContent = `Lives: ${this.lives}`;
@@ -140,7 +139,7 @@ class GameController {
 
     handleKeyPress(event) {
         if (!this.isPlaying || this.isPaused) return;
-    
+
         switch (event.key) {
             case "ArrowUp":
             case "ArrowDown":
@@ -152,33 +151,33 @@ class GameController {
                 this.pauseGame();
                 break;
         }
-    }    
+    }
 
     movePlayer(direction) {
         if (!this.isPlaying || this.isPaused) return;
-    
+
         const { row, col } = this.playerPosition;
         const movement = {
-            "ArrowUp":    { row: 0,  col: -1 },
-            "ArrowDown":  { row: 0,  col: 1 },
-            "ArrowLeft":  { row: -1, col: 0 },
-            "ArrowRight": { row: 1,  col: 0 }
+            "ArrowUp": { row: 0, col: -1 },
+            "ArrowDown": { row: 0, col: 1 },
+            "ArrowLeft": { row: -1, col: 0 },
+            "ArrowRight": { row: 1, col: 0 }
         };
-    
+
         if (!movement[direction]) return;
-    
+
         let newRow = row + movement[direction].row;
         let newCol = col + movement[direction].col;
-    
+
         // Ensure new position is within bounds
         if (newRow < 1 || newRow > 15 || newCol < 1 || newCol > 11) return;
-    
+
         // Check if the new position is walkable before moving
         if (gameBoard.isWalkable(newRow, newCol)) {
             this.updatePlayerPosition(newRow, newCol);
         }
     }
-    
+
 
     updatePlayerPosition(newRow, newCol) {
         const cells = document.getElementsByClassName("cell");
