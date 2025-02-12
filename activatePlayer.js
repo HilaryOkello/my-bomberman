@@ -10,6 +10,7 @@ class GameController {
         this.lives = 3;
         this.level = 1;
         this.time = 0;
+        this.enemyCount = 0;
         this.gameTimer = null;
         this.playerPosition = { row: 1, col: 1 }; // Initial player position
 
@@ -24,6 +25,8 @@ class GameController {
         this.timeDisplay = document.getElementById("time");
         this.livesDisplay = document.getElementById("lives");
         this.levelDisplay = document.getElementById("level");
+        this.gameOverScreen = document.getElementById("game-over-screen");
+        this.winScreen = document.getElementById("game-win-screen");
 
         // Bind methods
         this.startGame = this.startGame.bind(this);
@@ -72,7 +75,8 @@ class GameController {
         this.updatePlayerPosition(this.playerPosition.row, this.playerPosition.col);
 
         // Spawn enemies and start their movement
-        const enemies = spawnEnemies(4); // Spawn 4 enemies, adjust number as needed
+        this.enemyCount = 4
+        const enemies = spawnEnemies(this.enemyCount); // Spawn 4 enemies, adjust number as needed
         moveEnemies(enemies, this.playerPosition, () => {
             this.lives--;
             this.livesDisplay.textContent = `Lives: ${this.lives}`;
@@ -81,6 +85,18 @@ class GameController {
                 document.getElementById('game-over-screen').classList.remove('hidden');
             }
         });
+    }
+
+    enemyDefeated() {
+        this.enemyCount--;
+        this.checkWinCondition();
+    }
+
+    checkWinCondition() {
+        if (this.enemyCount <= 0) {
+            this.stopGame();
+            this.winScreen.classList.remove("hidden");
+        }
     }
 
     pauseGame() {
