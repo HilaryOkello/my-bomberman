@@ -54,9 +54,12 @@ function explodeBomb(x, y) {
         }
 
         // Handle enemy hit (if applicable)
-        if (targetCell.classList.contains('enemy')) {
-            targetCell.classList.remove('enemy');
+        const enemyInCell = targetCell.querySelector('.enemy');
+        if (enemyInCell) {
+            enemyInCell.parentElement.remove();
+            gameController.enemyDefeated() 
         }
+
 
         // Remove explosion effect after 500ms
         setTimeout(() => {

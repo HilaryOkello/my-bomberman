@@ -39,17 +39,21 @@ function isNearOtherEnemy(x, y, enemies) {
 }
 
 function updateEnemyPosition(enemy) {
+    // Find the enemy's previous position and remove it
+    const prevCell = document.querySelector(`.enemy-container[data-x="${enemy.x}"][data-y="${enemy.y}"]`);
+    if (prevCell) {
+        prevCell.remove();
+    }
+
+    // Get the new cell for the enemy
     const cell = document.querySelector(`[data-x="${enemy.x}"][data-y="${enemy.y}"]`);
     if (cell) {
-        // First, remove enemy from its current position if it exists
-        const existingEnemy = document.querySelector('.enemy-container');
-        if (existingEnemy) {
-            existingEnemy.remove();
-        }
-
         // Create and add the new enemy container
         const enemyContainer = document.createElement("div");
         enemyContainer.classList.add("enemy-container");
+        enemyContainer.setAttribute("data-x", enemy.x); // Store x position
+        enemyContainer.setAttribute("data-y", enemy.y); // Store y position
+        
         enemy.element.style.width = "100%";
         enemy.element.style.height = "100%";
         enemyContainer.appendChild(enemy.element);
