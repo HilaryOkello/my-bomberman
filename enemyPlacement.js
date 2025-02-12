@@ -3,11 +3,13 @@ import gameBoard from "./gameBoard.js";
 export function spawnEnemies(numEnemies) {
     const enemies = [];
     for (let i = 0; i < numEnemies; i++) {
+        console.log(i)
         let x, y;
         // Keep trying until we find a valid position
         do {
             x = Math.floor(Math.random() * (gameBoard.width - 2)) + 1;
             y = Math.floor(Math.random() * (gameBoard.height - 2)) + 1;
+            console.log(`Trying position (${x}, ${y})`);
         } while (
             !gameBoard.isWalkable(x, y) || 
             isNearPlayer(x, y) || 
@@ -20,6 +22,7 @@ export function spawnEnemies(numEnemies) {
             y,
             element: document.createElement("div")
         };
+        console.log(enemy)
         enemy.element.classList.add("enemy");
         updateEnemyPosition(enemy);
         enemies.push(enemy);
@@ -39,17 +42,21 @@ function isNearOtherEnemy(x, y, enemies) {
 }
 
 function updateEnemyPosition(enemy) {
+    // Find the enemy's previous position and remove it
+    const prevCell = document.querySelector(`.enemy-container[data-x="${enemy.x}"][data-y="${enemy.y}"]`);
+    if (prevCell) {
+        prevCell.remove();
+    }
+
+    // Get the new cell for the enemy
     const cell = document.querySelector(`[data-x="${enemy.x}"][data-y="${enemy.y}"]`);
     if (cell) {
-        // First, remove enemy from its current position if it exists
-        const existingEnemy = document.querySelector('.enemy-container');
-        if (existingEnemy) {
-            existingEnemy.remove();
-        }
-
         // Create and add the new enemy container
         const enemyContainer = document.createElement("div");
         enemyContainer.classList.add("enemy-container");
+        enemyContainer.setAttribute("data-x", enemy.x); // Store x position
+        enemyContainer.setAttribute("data-y", enemy.y); // Store y position
+        
         enemy.element.style.width = "100%";
         enemy.element.style.height = "100%";
         enemyContainer.appendChild(enemy.element);
