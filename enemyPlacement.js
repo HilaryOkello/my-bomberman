@@ -3,13 +3,11 @@ import gameBoard from "./gameBoard.js";
 export function spawnEnemies(numEnemies) {
     const enemies = [];
     for (let i = 0; i < numEnemies; i++) {
-        console.log(i)
         let x, y;
         // Keep trying until we find a valid position
         do {
             x = Math.floor(Math.random() * (gameBoard.width - 2)) + 1;
             y = Math.floor(Math.random() * (gameBoard.height - 2)) + 1;
-            console.log(`Trying position (${x}, ${y})`);
         } while (
             !gameBoard.isWalkable(x, y) || 
             isNearPlayer(x, y) || 
@@ -22,7 +20,6 @@ export function spawnEnemies(numEnemies) {
             y,
             element: document.createElement("div")
         };
-        console.log(enemy)
         enemy.element.classList.add("enemy");
         updateEnemyPosition(enemy);
         enemies.push(enemy);
