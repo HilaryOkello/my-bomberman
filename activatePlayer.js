@@ -27,6 +27,7 @@ class GameController {
         this.levelDisplay = document.getElementById("level");
         this.gameOverScreen = document.getElementById("game-over-screen");
         this.winScreen = document.getElementById("game-win-screen");
+        this.playAgain = document.getElementById("play-again-btn");
 
         // Bind methods
         this.startGame = this.startGame.bind(this);
@@ -37,6 +38,8 @@ class GameController {
         this.restartGame = this.restartGame.bind(this);
         this.movePlayer = this.movePlayer.bind(this);
         this.updatePlayerPosition = this.updatePlayerPosition.bind(this);
+        this.enemyDefeated = this.enemyDefeated.bind(this);
+        this.stopGame = this.stopGame.bind(this);
 
         // Initialize event listeners
         this.initializeEventListeners();
@@ -47,16 +50,20 @@ class GameController {
         this.pauseBtn.addEventListener("click", this.pauseGame);
         this.resumeBtn.addEventListener("click", this.resumeGame);
         this.restartBtn.addEventListener("click", this.restartGame);
+        this.playAgain.addEventListener("click", this.startGame);
         document.addEventListener("keydown", this.handleKeyPress);
     }
 
     startGame() {
+        this.winScreen.classList.add("hidden");
         this.isPlaying = true;
         this.isPaused = false;
         this.score = 0;
         this.lives = 3;
         this.level = 1;
         this.time = 0;
+        this.enemyCount = 4;
+        this.playerPosition = {row: 1, col: 1};
 
         // Update displays
         this.scoreDisplay.textContent = this.score;
@@ -116,8 +123,8 @@ class GameController {
 
     restartGame() {
         this.stopGame();
-        this.startGame();
         this.pauseScreen.classList.add("hidden");
+        this.startGame(); 
     }
 
     stopGame() {
@@ -126,6 +133,7 @@ class GameController {
         if (this.gameTimer) {
             clearInterval(this.gameTimer);
         }
+        document.getElementsByClassName("player")[0].classList.remove("player");
     }
 
     updateTimer() {
