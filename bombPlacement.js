@@ -1,3 +1,4 @@
+import { scoreManager, SCORE_CONFIG } from './scores.js';
 import gameController from './activatePlayer.js';
 import gameBoard from './gameBoard.js';
 
@@ -47,6 +48,7 @@ function explodeBomb(x, y) {
         } else if (cell.type === 'vertical') {
             targetCell.style.backgroundImage = "url('./images/explosion_vertical.png')";
         }
+        // scoreManager.addTimeBonus(SCORE_CONFIG.TIME_BONUS_FACTOR);
 
         // Handle player hit
         if (targetCell.classList.contains('player')) {
@@ -59,6 +61,7 @@ function explodeBomb(x, y) {
         const enemyInCell = targetCell.querySelector('.enemy');
         if (enemyInCell) {
             enemyInCell.parentElement.remove();
+            scoreManager.addPoints(SCORE_CONFIG.ENEMY_DEFEATED);
             gameController.enemyDefeated() 
         }
 
