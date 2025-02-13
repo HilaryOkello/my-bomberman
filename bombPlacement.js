@@ -16,7 +16,7 @@ export function placeBomb() {
 
     bombCell.classList.add('bomb');
 
-    setTimeout(() => explodeBomb(bombX, bombY), 3000);
+    setTimeout(() => explodeBomb(bombX, bombY), 1500);
 }
 
 function explodeBomb(x, y) {
