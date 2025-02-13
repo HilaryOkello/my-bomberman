@@ -9,8 +9,8 @@ export function spawnEnemies(numEnemies) {
             x = Math.floor(Math.random() * (gameBoard.width - 2)) + 1;
             y = Math.floor(Math.random() * (gameBoard.height - 2)) + 1;
         } while (
-            !gameBoard.isWalkable(x, y) || 
-            isNearPlayer(x, y) || 
+            !gameBoard.isWalkable(x, y) ||
+            isNearPlayer(x, y) ||
             isNearOtherEnemy(x, y, enemies)
         );
 
@@ -53,7 +53,7 @@ function updateEnemyPosition(enemy) {
         enemyContainer.classList.add("enemy-container");
         enemyContainer.setAttribute("data-x", enemy.x); // Store x position
         enemyContainer.setAttribute("data-y", enemy.y); // Store y position
-        
+
         enemy.element.style.width = "100%";
         enemy.element.style.height = "100%";
         enemyContainer.appendChild(enemy.element);
@@ -65,14 +65,20 @@ export function moveEnemies(enemies, player, reduceLives) {
     cleanupEnemies();
 
     window.enemyMoveInterval = setInterval(() => {
-        enemies.forEach((enemy) => {
+        enemies.forEach((enemy, index) => {
+            // Check if the enemy still exists in the DOM
+            if (!document.contains(enemy.element)) {
+                // Remove the enemy from the list if it no longer exists
+                enemies.splice(index, 1);
+                return;
+            }
             const validMoves = getValidMoves(enemy, enemies);
             if (validMoves.length > 0) {
                 const move = validMoves[Math.floor(Math.random() * validMoves.length)];
                 enemy.x = move.x;
                 enemy.y = move.y;
                 updateEnemyPosition(enemy);
-                
+
                 if (enemy.x === player.x && enemy.y === player.y) {
                     reduceLives();
                 }
@@ -105,9 +111,9 @@ function getValidMoves(enemy, allEnemies) {
 }
 
 function isPositionOccupiedByEnemy(position, enemies, currentEnemy) {
-    return enemies.some(enemy => 
-        enemy !== currentEnemy && 
-        enemy.x === position.x && 
+    return enemies.some(enemy =>
+        enemy !== currentEnemy &&
+        enemy.x === position.x &&
         enemy.y === position.y
     );
 }
