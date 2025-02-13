@@ -1,6 +1,7 @@
 import gameBoard from "./gameBoard.js";
 import { placeBomb } from "./bombPlacement.js";
 import { spawnEnemies, moveEnemies } from "./enemyPlacement.js";
+import { scoreManager } from "./scores.js";
 
 class GameController {
     constructor() {
@@ -126,7 +127,13 @@ class GameController {
     restartGame() {
         this.stopGame();
         this.gameOverScreen.classList.add("hidden");
-        this.startGame(); 
+        this.startGame();
+        scoreManager.reset();
+    }
+
+    completeLevel(remainingTime) {
+        scoreManager.addPoints(SCORE_CONFIG.LEVEL_COMPLETION_BONUS);
+        scoreManager.addTimeBonus(remainingTime);
     }
 
     stopGame() {
