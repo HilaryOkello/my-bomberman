@@ -28,6 +28,7 @@ class GameController {
         this.gameOverScreen = document.getElementById("game-over-screen");
         this.winScreen = document.getElementById("game-win-screen");
         this.playAgain = document.getElementById("play-again-btn");
+        this.gameOverRestart =document.getElementById("game-over-btn");
 
         // Bind methods
         this.startGame = this.startGame.bind(this);
@@ -50,6 +51,7 @@ class GameController {
         this.pauseBtn.addEventListener("click", this.pauseGame);
         this.resumeBtn.addEventListener("click", this.resumeGame);
         this.restartBtn.addEventListener("click", this.restartGame);
+        this.gameOverRestart.addEventListener("click", this.restartGame);
         this.playAgain.addEventListener("click", this.startGame);
         document.addEventListener("keydown", this.handleKeyPress);
     }
@@ -123,7 +125,7 @@ class GameController {
 
     restartGame() {
         this.stopGame();
-        this.pauseScreen.classList.add("hidden");
+        this.gameOverScreen.classList.add("hidden");
         this.startGame(); 
     }
 
