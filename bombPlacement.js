@@ -51,6 +51,8 @@ function explodeBomb(x, y) {
         // Handle player hit
         if (targetCell.classList.contains('player')) {
             reducePlayerLives();
+            targetCell.classList.remove('player');
+            gameController.updatePlayerPosition(1, 1);
         }
 
         // Handle enemy hit (if applicable)
