@@ -107,4 +107,12 @@ function reducePlayerLives() {
 
 function gameOver() {
     document.getElementById('game-over-screen').classList.remove('hidden');
+    
+    let cells = document.getElementsByClassName('cell');
+    for (let cell of cells) {
+        const enemyInCell = cell.querySelector('.enemy');
+        if (enemyInCell) {
+            enemyInCell.parentElement.remove();
+        }
+    }
 }
