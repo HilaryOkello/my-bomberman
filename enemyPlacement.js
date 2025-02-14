@@ -63,7 +63,9 @@ function updateEnemyPosition(enemy) {
     }
 }
 
-export function moveEnemies(enemies, player, reduceLives) {
+export function moveEnemies(enemies, isPaused) {
+    if (isPaused) return;
+    
     cleanupEnemies();
 
     // Set up continuous collision detection
@@ -79,7 +81,7 @@ export function moveEnemies(enemies, player, reduceLives) {
                 enemies.splice(index, 1);
                 return;
             }
-            
+
             const validMoves = getValidMoves(enemy, enemies);
             if (validMoves.length > 0) {
                 const move = validMoves[Math.floor(Math.random() * validMoves.length)];
@@ -96,14 +98,14 @@ function checkAllEnemiesCollision(enemies) {
         // Get current player position from DOM
         const playerElement = document.querySelector('.player');
         if (!playerElement) return;
-        
+
         // Get player coordinates from the cell containing the player
         const playerCell = playerElement.closest('.cell');
         if (!playerCell) return;
-        
+
         const playerX = parseInt(playerCell.getAttribute('data-x'));
         const playerY = parseInt(playerCell.getAttribute('data-y'));
-        
+
         // Check if enemy and player coordinates match
         if (enemy.x === playerX && enemy.y === playerY) {
             handleCollision();
@@ -120,7 +122,7 @@ function handleCollision() {
 
     // Update player position to start
     gameController.updatePlayerPosition(1, 1);
-    
+
     // Reduce lives
     reducePlayerLives();
 }
@@ -165,5 +167,5 @@ export function cleanupEnemies() {
     if (window.collisionCheckInterval) {
         clearInterval(window.collisionCheckInterval);
         window.collisionCheckInterval = null;
-    }    
+    }
 }
