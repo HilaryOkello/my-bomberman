@@ -1,4 +1,6 @@
 import gameBoard from "./gameBoard.js";
+import gameController from "./activatePlayer.js";
+import { reducePlayerLives } from "./bombPlacement.js";
 
 export function spawnEnemies(numEnemies) {
     const enemies = [];
@@ -79,12 +81,37 @@ export function moveEnemies(enemies, player, reduceLives) {
                 enemy.y = move.y;
                 updateEnemyPosition(enemy);
 
-                if (enemy.x === player.x && enemy.y === player.y) {
-                    reduceLives();
-                }
+                // Check for collision with player after movement
+                checkPlayerCollision(enemy, player, reduceLives);
             }
         });
     }, 1000);
+}
+
+function checkPlayerCollision(enemy) {
+    // Get current player position from DOM
+    const playerElement = document.querySelector('.player');
+    if (!playerElement) return;
+    
+    // Get player coordinates from the cell containing the player
+    const playerCell = playerElement.closest('.cell');
+    const playerX = parseInt(playerCell.getAttribute('data-x'));
+    const playerY = parseInt(playerCell.getAttribute('data-y'));
+    
+    // Check if enemy and player coordinates match
+    if (enemy.x === playerX && enemy.y === playerY) {
+        // Remove player class from ALL cells to ensure no duplicate players
+        const allCells = document.querySelectorAll('.cell');
+        allCells.forEach(cell => {
+            cell.classList.remove('player');
+        });
+        
+        gameController.updatePlayerPosition(1, 1);
+        
+        // Reduce player lives
+        // reduceLives();
+        reducePlayerLives();
+    }
 }
 
 function getValidMoves(enemy, allEnemies) {
