@@ -6,7 +6,7 @@ export const SCORE_CONFIG = {
     TIME_BONUS_FACTOR: 10  // Points per second remaining
 };
 
-class ScoreManager {
+export class ScoreManager {
     constructor() {
       this.currentScore = 0;
       this.scoreDisplay = document.getElementById('score');
