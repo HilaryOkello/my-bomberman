@@ -1,4 +1,6 @@
 import gameBoard from "./gameBoard.js";
+import gameController from "./activatePlayer.js";
+import { reducePlayerLives } from "./bombPlacement.js";
 
 export function spawnEnemies(numEnemies) {
     const enemies = [];
@@ -64,27 +66,63 @@ function updateEnemyPosition(enemy) {
 export function moveEnemies(enemies, player, reduceLives) {
     cleanupEnemies();
 
+    // Set up continuous collision detection
+    window.collisionCheckInterval = setInterval(() => {
+        checkAllEnemiesCollision(enemies);
+    }, 1); // Check every 100ms for more responsive collision detection
+
+    // Regular enemy movement
     window.enemyMoveInterval = setInterval(() => {
         enemies.forEach((enemy, index) => {
             // Check if the enemy still exists in the DOM
             if (!document.contains(enemy.element)) {
-                // Remove the enemy from the list if it no longer exists
                 enemies.splice(index, 1);
                 return;
             }
+            
             const validMoves = getValidMoves(enemy, enemies);
             if (validMoves.length > 0) {
                 const move = validMoves[Math.floor(Math.random() * validMoves.length)];
                 enemy.x = move.x;
                 enemy.y = move.y;
                 updateEnemyPosition(enemy);
-
-                if (enemy.x === player.x && enemy.y === player.y) {
-                    reduceLives();
-                }
             }
         });
     }, 1000);
+}
+
+function checkAllEnemiesCollision(enemies) {
+    enemies.forEach(enemy => {
+        // Get current player position from DOM
+        const playerElement = document.querySelector('.player');
+        if (!playerElement) return;
+        
+        // Get player coordinates from the cell containing the player
+        const playerCell = playerElement.closest('.cell');
+        if (!playerCell) return;
+        
+        const playerX = parseInt(playerCell.getAttribute('data-x'));
+        const playerY = parseInt(playerCell.getAttribute('data-y'));
+        
+        // Check if enemy and player coordinates match
+        if (enemy.x === playerX && enemy.y === playerY) {
+            handleCollision();
+        }
+    });
+}
+
+function handleCollision() {
+    // Remove player class from ALL cells to ensure no duplicate players
+    const allCells = document.querySelectorAll('.cell');
+    allCells.forEach(cell => {
+        cell.classList.remove('player');
+    });
+
+    // Update player position to start
+    gameController.updatePlayerPosition(1, 1);
+    
+    // Reduce lives
+    reducePlayerLives();
 }
 
 function getValidMoves(enemy, allEnemies) {
@@ -123,4 +161,9 @@ export function cleanupEnemies() {
         clearInterval(window.enemyMoveInterval);
         window.enemyMoveInterval = null;
     }
+
+    if (window.collisionCheckInterval) {
+        clearInterval(window.collisionCheckInterval);
+        window.collisionCheckInterval = null;
+    }    
 }

@@ -1,5 +1,5 @@
 import gameBoard from "./gameBoard.js";
-import { placeBomb } from "./bombPlacement.js";
+import { reducePlayerLives } from "./bombPlacement.js";
 import { spawnEnemies, moveEnemies } from "./enemyPlacement.js";
 import { scoreManager } from "./scores.js";
 
@@ -58,6 +58,7 @@ class GameController {
     }
 
     startGame() {
+        scoreManager.reset();
         this.winScreen.classList.add("hidden");
         this.isPlaying = true;
         this.isPaused = false;
@@ -191,8 +192,18 @@ class GameController {
 
         // Check if the new position is walkable before moving
         if (gameBoard.isWalkable(newRow, newCol)) {
+            const targetCell = document.querySelector(`[data-x="${newRow}"][data-y="${newCol}"]`);
+        
+            // Update player position first
             this.updatePlayerPosition(newRow, newCol);
+        
+            // Check if the new position contains an enemy
+            if (targetCell && targetCell.firstChild && targetCell.firstChild.classList.contains('enemy')) {
+                reducePlayerLives();
+                this.updatePlayerPosition(); // Reset player position if needed
+            }
         }
+        
     }
 
 
