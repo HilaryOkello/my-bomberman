@@ -11,6 +11,8 @@ export function placeBomb() {
     const bombX = gameController.playerPosition.row;
     const bombY = gameController.playerPosition.col;
 
+    if (bombX == 1 && bombY == 1) return;
+
     const bombCell = document.querySelector(`[data-x="${bombX}"][data-y="${bombY}"]`);
 
     if (!bombCell || bombCell.classList.contains('bomb')) return;
@@ -29,14 +31,14 @@ function explodeBomb(x, y) {
         { x: x, y: y - 1, type: 'vertical' }
     ];
 
+    let playerHit = false; // Flag to prevent multiple player hits
+
     explosionCells.forEach(cell => {
         const targetCell = document.querySelector(`[data-x="${cell.x}"][data-y="${cell.y}"]`);
         if (!targetCell) return;
 
         // Stop explosion if it hits an unbreakable wall
         if (targetCell.classList.contains('wall')) return;
-
-
 
         // Apply explosion effect with correct image
         targetCell.classList.add('explosion');
@@ -51,7 +53,8 @@ function explodeBomb(x, y) {
         // scoreManager.addTimeBonus(SCORE_CONFIG.TIME_BONUS_FACTOR);
 
         // Handle player hit
-        if (targetCell.classList.contains('player')) {
+        if (targetCell.classList.contains('player') && !playerHit) {
+            playerHit = true;
             reducePlayerLives();
             targetCell.classList.remove('player');
             gameController.updatePlayerPosition(1, 1);
@@ -65,7 +68,6 @@ function explodeBomb(x, y) {
             gameController.enemyDefeated() 
         }
 
-
         // Remove explosion effect after 500ms
         setTimeout(() => {
             // Handle breakable walls (remove them)
@@ -75,7 +77,7 @@ function explodeBomb(x, y) {
             }
             targetCell.classList.remove('explosion');
             targetCell.style.backgroundImage = "";
-            gameBoard.updateCell(cell.x, cell.y, 'empty');
+            // gameBoard.updateCell(cell.x, cell.y, 'empty');
         }, 500);
     });
 
@@ -110,12 +112,4 @@ export function reducePlayerLives() {
 
 function gameOver() {
     document.getElementById('game-over-screen').classList.remove('hidden');
-    
-    let cells = document.getElementsByClassName('cell');
-    for (let cell of cells) {
-        const enemyInCell = cell.querySelector('.enemy');
-        if (enemyInCell) {
-            enemyInCell.parentElement.remove();
-        }
-    }
 }
