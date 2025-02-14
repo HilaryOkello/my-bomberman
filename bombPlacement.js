@@ -94,7 +94,7 @@ function explodeBomb(x, y) {
     }
 }
 
-function reducePlayerLives() {
+export function reducePlayerLives() {
     let livesElement = document.getElementById('lives');
     let lives = parseInt(livesElement.innerText.split(': ')[1]);
 
