@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
           case "ArrowRight":
             // Handle movement
             break;
-          case " ":
+          case "x":
             placeBomb(); 
             break;
         }
