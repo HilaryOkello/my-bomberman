@@ -2,9 +2,16 @@ import { scoreManager, SCORE_CONFIG } from './scores.js';
 import gameController from './activatePlayer.js';
 import gameBoard from './gameBoard.js';
 
+let bombActive = false;
+
 export function placeBomb() {
     if (!gameController.isPlaying || gameController.isPaused) {
         console.warn('Game is not active. Cannot place bomb.');
+        return;
+    }
+
+    if (bombActive) {
+        console.warn('Bomb is already active. Wait for it to explode.');
         return;
     }
 
@@ -18,6 +25,7 @@ export function placeBomb() {
     if (!bombCell || bombCell.classList.contains('bomb')) return;
 
     bombCell.classList.add('bomb');
+    bombActive = true;
 
     setTimeout(() => explodeBomb(bombX, bombY), 1500);
 }
@@ -92,7 +100,8 @@ function explodeBomb(x, y) {
             bombCell.classList.remove('explosion');
             bombCell.style.backgroundImage = "";
             gameBoard.updateCell(x, y, 'empty');
-        }, 2000);
+            bombActive = false;
+        }, 500);
     }
 }
 
