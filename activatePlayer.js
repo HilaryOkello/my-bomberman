@@ -108,8 +108,12 @@ class GameController {
 
         this.isPaused = true;
         clearInterval(this.gameTimer);
+    
+        // moveEnemies(null, null, null, true);
+        clearInterval(window.collisionCheckInterval); // Stop checking collision when paused
+        clearInterval(window.enemyMoveInterval); // Stop enemy movement
+
         this.pauseScreen.classList.remove("hidden");
-        moveEnemies(null, null, null, true);
     }
 
     resumeGame() {
