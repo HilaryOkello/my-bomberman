@@ -111,5 +111,30 @@ export function reducePlayerLives() {
 }
 
 function gameOver() {
+    // Stop game
+    gameController.stopGame();
+
+        // Clear any remaining intervals
+        if (window.collisionCheckInterval) {
+            clearInterval(window.collisionCheckInterval);
+        }
+        if (window.enemyMoveInterval) {
+            clearInterval(window.enemyMoveInterval);
+        }
+
+    // Remove all enemies from the board
+    const enemies = document.querySelectorAll('.enemy');
+    enemies.forEach(enemy => {
+        if (enemy.parentElement) {
+            enemy.parentElement.remove();
+        }
+    });
+    
+    // Remove player from the board
+    const playerCell = document.querySelector('.player');
+    if (playerCell) {
+        playerCell.classList.remove('player');
+    }
+
     document.getElementById('game-over-screen').classList.remove('hidden');
 }
