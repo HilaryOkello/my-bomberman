@@ -71,7 +71,7 @@ export function moveEnemies(enemies, isPaused) {
     // Set up continuous collision detection
     window.collisionCheckInterval = setInterval(() => {
         checkAllEnemiesCollision(enemies);
-    }, 1); // Check every 100ms for more responsive collision detection
+    }, 1); // Check every 1ms for more responsive collision detection
 
     // Regular enemy movement
     window.enemyMoveInterval = setInterval(() => {
@@ -94,6 +94,8 @@ export function moveEnemies(enemies, isPaused) {
 }
 
 function checkAllEnemiesCollision(enemies) {
+    if (!enemies || enemies.length === 0) return
+    
     enemies.forEach(enemy => {
         // Get current player position from DOM
         const playerElement = document.querySelector('.player');
