@@ -11,20 +11,29 @@
     0 2px 4px -2px rgb(0 0 0 / 0.1);
   --game-border-radius: 12px;
   --header-height: 80px;
-  --webkit-background-clip: text;
+  --container-width: clamp(300px, 90vw, 1200px);
+  --board-width: clamp(280px, 80vw, 800px);
+  --spacing-unit: clamp(0.5rem, 2vw, 2rem);
 }
 
 body {
-  overflow-y: hidden;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
 }
 
 /* Game Container Styles */
 .game-container {
-  max-width: 60vw;
-  max-height: 90vh;
-  margin: 2rem auto;
-  padding: 1rem;
-  font-family: "Inter", system-ui, -apple-system, sans-serif;
+ width: var(--container-width);
+  margin: var(--spacing-unit);
+  padding: var(--spacing-unit);
   background-color: var(--background-color);
   border-radius: var(--game-border-radius);
   box-shadow: 0 0 50px rgba(99, 102, 241, 0.1);
@@ -32,16 +41,15 @@ body {
 
 /* Game Header Styles */
 .game-header {
-  display: flex;
-  max-width: 40vw;
-  max-height: 10vh;
-  margin: 0 auto;
-  justify-content: space-between;
+  width: var(--board-width);
+  margin: 0 auto 1.5rem;
   align-items: center;
-  padding: 1rem;
+  padding: clamp(0.75rem, 2vw, 1.5rem);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: clamp(0.5rem, 1vw, 1rem);
   background-color: var(--surface-color);
   border-radius: var(--game-border-radius);
-  margin-bottom: 1rem;
   box-shadow: var(--card-shadow);
 }
 
@@ -49,54 +57,75 @@ body {
   background: linear-gradient(135deg,
       var(--primary-color),
       var(--secondary-color));
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
+  padding: clamp(0.75rem, 2vw, 1.25rem);
+  border-radius: clamp(4px, 1vw, 8px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2),
+  0 2px 4px -2px rgba(0, 0, 0, 0.1),
+  inset 0 2px 4px rgba(255, 255, 255, 0.1);
   text-align: center;
-  min-width: 60px;
+  min-width: clamp(50px, 10vw, 60px);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.score-panel:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px -1px rgba(0, 0, 0, 0.3),
+              0 4px 6px -2px rgba(0, 0, 0, 0.2),
+              inset 0 2px 4px rgba(255, 255, 255, 0.1);
 }
 
 .score-panel h3 {
   color: var(--text-primary);
   margin: 0;
-  font-size: 1rem;
+  font-size: clamp(0.75rem, 1.5vw, 1rem);
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.1em;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 #score {
-  font-size: 1rem;
+  font-size: clamp(0.25rem, 1.25vw, 1.75rem);
   font-weight: 700;
   color: var(--text-primary);
-  margin-top: 0.5rem;
+  margin-top: clamp(0.125rem, 0.5vw, 0.25rem);
+  font-feature-settings: "tnum";
+  font-variant-numeric: tabular-nums;
 }
 
 .game-stats {
   display: flex;
-  gap: 1.5rem;
+  justify-content: center;
+  gap: clamp(0.5rem, 1vw, 1.5rem);
   background-color: rgba(255, 255, 255, 0.1);
-  padding: 1rem 1.5rem;
-  border-radius: 8px;
+  padding: clamp(0.75rem, 1.5vw, 1.5rem);
+  border-radius: clamp(4px, 1vw, 8px);
   backdrop-filter: blur(8px);
 }
 
 .game-stats div {
   color: var(--text-secondary);
-  font-size: 0.9rem;
+  font-size: clamp(0.7rem, 1.25vw, 0.9rem);
   font-weight: 500;
+  white-space: nowrap;
+  align-items: center;
+  gap: 0.5rem;
+  font-feature-settings: "tnum";
+  font-variant-numeric: tabular-nums;
 }
 
 /* Game Board Styles */
 #game-board {
-  display: grid;
-  max-width: 40vw;
+  width: 100%;
+  width: var(--board-width);
   margin: 0 auto;
   aspect-ratio: 17 / 13;
+  display: grid;
   grid-template-columns: repeat(17, 1fr);
   grid-template-rows: repeat(13, 1fr);
-  gap: 1px;
+  gap: clamp(1px, 0.25vw, 2px);
   background-color: var(--surface-color);
-  padding: 1rem;
+  padding: clamp(0.5rem, 2vw, 1rem);
   border-radius: var(--game-border-radius);
   box-shadow: var(--card-shadow);
 }
@@ -183,11 +212,6 @@ body {
   z-index: 2;
 }
 
-/* .enemy {
-  background-image: url("./images/enemy.png");
-  animation: float 2s infinite;
-} */
-
 .powerup-speed {
   background-image: url("./images/powerup-speed.png");
   animation: float 2s infinite;
@@ -198,10 +222,10 @@ body {
   background: #4a90e2;
   color: white;
   border: none;
-  padding: 0.75rem 1.5rem;
+  padding: clamp(0.5rem, 1.5vw, 0.75rem) clamp(1rem, 2vw, 1.5rem);
   border-radius: 8px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size:  clamp(0.8rem, 1.5vw, 0.9rem);
   font-weight: 600;
   transition: all 0.2s ease;
   text-transform: uppercase;
@@ -220,15 +244,15 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: rgb(99, 97, 97);
-  color: whitesmoke;
-  padding: 2.5rem;
+  width: clamp(280px, 90vw, 400px);
+  background: var(--surface-color);
+  color: var(--text-primary);
+  padding: clamp(1.5rem, 4vw, 2.5rem);
   text-align: center;
   border-radius: var(--game-border-radius);
   backdrop-filter: blur(8px);
   box-shadow: 0 0 50px rgba(0, 0, 0, 0.3);
   z-index: 1000;
-  min-width: 300px;
 }
 
 .hidden {
@@ -299,22 +323,91 @@ button:hover {
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
-  .game-container {
-    padding: 1rem;
-    margin: 1rem;
-  }
 
-  .game-header {
-    flex-direction: column;
-    height: auto;
-    gap: 1rem;
-    padding: 1rem;
+/* Small Screens (Mobile Landscape & Small Tablets) - 481px to 767px */
+@media screen and (min-width: 481px) and (max-width: 767px) {
+  :root {
+    --container-width: 95vw;
+    --board-width: 90vw;
   }
 
   .game-stats {
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .pause-button {
+    width: 100%;
+  }
+
+  .overlay {
+    width: 65vw;
+  }
+
+  .overlay h1 {
+    font-size: 1.75rem;
+  }
+
+  .overlay h2 {
+    font-size: 1.5rem;
+  }
+}
+
+/* Extra Small Screens (Mobile Portrait & Narrow Phones) - 320px to 480px */
+@media screen and (min-width: 320px) and (max-width: 480px) {
+  :root {
+    --container-width: 98vw;
+    --board-width: 95vw;
+  }
+
+  .game-container {
+    padding: 0.5rem;
+  }
+
+  .game-header {
     gap: 0.5rem;
+  }
+
+  .overlay {
+    width: 70vw;
+    padding: 1rem;
+  }
+
+  .overlay h1 {
+    font-size: 1.5rem;
+  }
+
+  .overlay h2 {
+    font-size: 1.25rem;
+  }
+}
+
+/* Ultra Small Screens (Very Narrow Phones) - below 320px */
+@media screen and (max-width: 319px) {
+  :root {
+    --container-width: 100vw;
+    --board-width: 98vw;
+  }
+
+  .game-container {
+    padding: 0.25rem;
+  }
+
+  .game-header {
+    gap: 0.25rem;
+  }
+
+  .overlay {
+    width: 95vw;
+    padding: 0.75rem;
+  }
+
+  .overlay h1 {
+    font-size: 1.25rem;
+  }
+
+  .overlay h2 {
+    font-size: 1rem;
   }
 }
