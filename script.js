@@ -7,6 +7,15 @@ document.addEventListener("DOMContentLoaded", () => {
     gameBoard.initializeBoard();
   
     document.addEventListener("keydown", (event) => {
+      if (event.key === 'p') {
+        if (gameController.isPaused) {
+          gameController.resumeGame();
+        } else {
+          gameController.pauseGame();
+        }
+      }
+
+
       if (gameController.isPlaying && !gameController.isPaused) {
         switch (event.key) {
           case "ArrowUp":
@@ -15,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
           case "ArrowRight":
             // Handle movement
             break;
-          case "x":
+          case " ":
             placeBomb(); 
             break;
         }
