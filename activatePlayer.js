@@ -108,8 +108,12 @@ class GameController {
 
         this.isPaused = true;
         clearInterval(this.gameTimer);
+    
+        // moveEnemies(null, null, null, true);
+        clearInterval(window.collisionCheckInterval); // Stop checking collision when paused
+        clearInterval(window.enemyMoveInterval); // Stop enemy movement
+
         this.pauseScreen.classList.remove("hidden");
-        moveEnemies(null, null, null, true);
     }
 
     resumeGame() {
@@ -140,8 +144,15 @@ class GameController {
         if (this.gameTimer) {
             clearInterval(this.gameTimer);
         }
-        document.getElementsByClassName("player")[0].classList.remove("player");
-        let cells = document.getElementsByClassName('cell');
+
+        // Safely remove player class
+        const playerElement = document.getElementsByClassName("player")[0];
+        if (playerElement) {  // Check if player element exists first
+            playerElement.classList.remove("player");
+        }
+
+        // Clean up enemies
+        const cells = document.getElementsByClassName('cell');
         for (let cell of cells) {
             const enemyInCell = cell.querySelector('.enemy');
             if (enemyInCell) {
