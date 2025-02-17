@@ -71,9 +71,18 @@ function explodeBomb(x, y) {
         // Handle enemy hit (if applicable)
         const enemyInCell = targetCell.querySelector('.enemy');
         if (enemyInCell) {
+            // Remove from DOM
             enemyInCell.parentElement.remove();
+
+            // Remove from gameController.enemies array
+            const enemyX = parseInt(targetCell.getAttribute('data-x'));
+            const enemyY = parseInt(targetCell.getAttribute('data-y'));
+            gameController.enemies = gameController.enemies.filter(enemy =>
+                !(enemy.x === enemyX && enemy.y === enemyY)
+            );
+
             scoreManager.addPoints(SCORE_CONFIG.ENEMY_DEFEATED);
-            gameController.enemyDefeated() 
+            gameController.enemyDefeated();
         }
 
         // Remove explosion effect after 500ms
@@ -123,13 +132,13 @@ function gameOver() {
     // Stop game
     gameController.stopGame();
 
-        // Clear any remaining intervals
-        if (window.collisionCheckInterval) {
-            clearInterval(window.collisionCheckInterval);
-        }
-        if (window.enemyMoveInterval) {
-            clearInterval(window.enemyMoveInterval);
-        }
+    // Clear any remaining intervals
+    if (window.collisionCheckInterval) {
+        clearInterval(window.collisionCheckInterval);
+    }
+    if (window.enemyMoveInterval) {
+        clearInterval(window.enemyMoveInterval);
+    }
 
     // Remove all enemies from the board
     const enemies = document.querySelectorAll('.enemy');
@@ -138,7 +147,7 @@ function gameOver() {
             enemy.parentElement.remove();
         }
     });
-    
+
     // Remove player from the board
     const playerCell = document.querySelector('.player');
     if (playerCell) {
