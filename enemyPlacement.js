@@ -40,7 +40,7 @@ function isNearOtherEnemy(x, y, enemies) {
     );
 }
 
-function updateEnemyPosition(enemy) {
+export function updateEnemyPosition(enemy) {
     // Find the enemy's previous position and remove it
     const prevCell = document.querySelector(`.enemy-container[data-x="${enemy.x}"][data-y="${enemy.y}"]`);
     if (prevCell) {
@@ -63,37 +63,21 @@ function updateEnemyPosition(enemy) {
     }
 }
 
-export function moveEnemies(enemies, isPaused) {
-    if (isPaused) return;
-    
-    cleanupEnemies();
-
-    // Set up continuous collision detection
-    window.collisionCheckInterval = setInterval(() => {
-        checkAllEnemiesCollision(enemies);
-    }, 1); // Check every 1ms for more responsive collision detection
-
-    // Regular enemy movement
-    window.enemyMoveInterval = setInterval(() => {
-        enemies.forEach((enemy, index) => {
-            // Check if the enemy still exists in the DOM
-            if (!document.contains(enemy.element)) {
-                enemies.splice(index, 1);
-                return;
-            }
-
-            const validMoves = getValidMoves(enemy, enemies);
-            if (validMoves.length > 0) {
-                const move = validMoves[Math.floor(Math.random() * validMoves.length)];
-                enemy.x = move.x;
-                enemy.y = move.y;
-                updateEnemyPosition(enemy);
-            }
-        });
-    }, 1000);
+export function updateEnemy(enemy) {
+    // Only update enemy position every second
+    const currentTime = performance.now();
+    if (!enemy.lastMoveTime || currentTime - enemy.lastMoveTime >= 1000) {
+        const validMoves = getValidMoves(enemy, gameController.enemies);
+        if (validMoves.length > 0) {
+            const move = validMoves[Math.floor(Math.random() * validMoves.length)];
+            enemy.x = move.x;
+            enemy.y = move.y;
+            enemy.lastMoveTime = currentTime;
+        }
+    }
 }
 
-function checkAllEnemiesCollision(enemies) {
+export function checkAllEnemiesCollision(enemies) {
     if (!enemies || enemies.length === 0) return
     
     enemies.forEach(enemy => {
