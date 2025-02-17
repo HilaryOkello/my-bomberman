@@ -1,6 +1,6 @@
 import gameBoard from "./gameBoard.js";
 import { reducePlayerLives } from "./bombPlacement.js";
-import { spawnEnemies, moveEnemies } from "./enemyPlacement.js";
+import { spawnEnemies} from "./enemyPlacement.js";
 import { scoreManager } from "./scores.js";
 
 class GameController {
@@ -14,7 +14,6 @@ class GameController {
         this.enemyCount = 4;
         this.gameTimer = null; 2
         this.playerPosition = { row: 1, col: 1 }; // Initial player position
-
         // Get DOM elements
         this.startScreen = document.getElementById("start-screen");
         this.startBtn = document.getElementById("start-btn");
@@ -88,7 +87,6 @@ class GameController {
 
         // Spawn enemies and start their movement
         this.enemies = spawnEnemies(this.enemyCount);
-        moveEnemies(this.enemies, false);
     }
 
     enemyDefeated() {
@@ -122,7 +120,6 @@ class GameController {
         this.isPaused = false;
         this.pauseScreen.classList.add("hidden");
         this.gameTimer = setInterval(this.updateTimer, 1000);
-        moveEnemies(this.enemies, false);
     }
 
     restartGame() {
