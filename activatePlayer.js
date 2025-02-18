@@ -1,7 +1,8 @@
 import gameBoard from "./gameBoard.js";
 import { reducePlayerLives } from "./bombPlacement.js";
-import { spawnEnemies, moveEnemies } from "./enemyPlacement.js";
+import { spawnEnemies } from "./enemyPlacement.js";
 import { scoreManager } from "./scores.js";
+import { Player } from './player.js';
 
 class GameController {
     constructor() {
@@ -12,8 +13,8 @@ class GameController {
         this.level = 1;
         this.time = 0;
         this.enemyCount = 4;
-        this.gameTimer = null; 2
-        this.playerPosition = { row: 1, col: 1 }; // Initial player position
+        this.gameTimer = null;
+        this.player = null;
 
         // Get DOM elements
         this.startScreen = document.getElementById("start-screen");
@@ -68,7 +69,7 @@ class GameController {
         this.time = 0;
         this.enemyCount = 4;
         this.enemies = [];
-        this.playerPosition = { row: 1, col: 1 };
+        this.player = new Player();
 
         // Update displays
         this.scoreDisplay.textContent = this.score;
@@ -84,11 +85,10 @@ class GameController {
         this.gameTimer = setInterval(this.updateTimer, 1000);
 
         // Place player on the board
-        this.updatePlayerPosition(this.playerPosition.row, this.playerPosition.col);
+        this.updatePlayerPosition(1, 1);
 
         // Spawn enemies and start their movement
         this.enemies = spawnEnemies(this.enemyCount);
-        moveEnemies(this.enemies, false);
     }
 
     enemyDefeated() {
@@ -108,7 +108,7 @@ class GameController {
 
         this.isPaused = true;
         clearInterval(this.gameTimer);
-    
+
         // moveEnemies(null, null, null, true);
         clearInterval(window.collisionCheckInterval); // Stop checking collision when paused
         clearInterval(window.enemyMoveInterval); // Stop enemy movement
@@ -122,7 +122,6 @@ class GameController {
         this.isPaused = false;
         this.pauseScreen.classList.add("hidden");
         this.gameTimer = setInterval(this.updateTimer, 1000);
-        moveEnemies(this.enemies, false);
     }
 
     restartGame() {
@@ -145,10 +144,8 @@ class GameController {
             clearInterval(this.gameTimer);
         }
 
-        // Safely remove player class
-        const playerElement = document.getElementsByClassName("player")[0];
-        if (playerElement) {  // Check if player element exists first
-            playerElement.classList.remove("player");
+        if (document.getElementById("player")) {
+            player.remove()
         }
 
         // Clean up enemies
@@ -189,58 +186,23 @@ class GameController {
     movePlayer(direction) {
         if (!this.isPlaying || this.isPaused) return;
 
-        const { row, col } = this.playerPosition;
-        const movement = {
-            "ArrowUp": { row: 0, col: -1 },
-            "ArrowDown": { row: 0, col: 1 },
-            "ArrowLeft": { row: -1, col: 0 },
-            "ArrowRight": { row: 1, col: 0 }
-        };
+        if (this.player.move(direction)) {
+            // Check for collisions after movement
+            const currentCell = this.player.getCurrentCell();
 
-        if (!movement[direction]) return;
-
-        let newRow = row + movement[direction].row;
-        let newCol = col + movement[direction].col;
-
-        // Ensure new position is within bounds
-        if (newRow < 1 || newRow > 15 || newCol < 1 || newCol > 11) return;
-
-        // Check if the new position is walkable before moving
-        if (gameBoard.isWalkable(newRow, newCol)) {
-            const targetCell = document.querySelector(`[data-x="${newRow}"][data-y="${newCol}"]`);
-
-            // Update player position first
-            this.updatePlayerPosition(newRow, newCol);
-
-            // Check if the new position contains an enemy
-            if (targetCell && targetCell.firstChild && targetCell.firstChild.classList.contains('enemy')) {
+            // Check for enemy collision
+            if (currentCell.querySelector('.enemy')) {
                 reducePlayerLives();
-                this.updatePlayerPosition(); // Reset player position if needed
+                this.player.resetToStart();
             }
         }
-
     }
 
 
     updatePlayerPosition(newRow, newCol) {
-        const cells = document.getElementsByClassName("cell");
-
-        // Calculate old and new indexes
-        const oldIndex = (this.playerPosition.row) + (this.playerPosition.col * 17);
-        const newIndex = (newRow) + (newCol * 17);
-
-        // Remove player from the old position
-        if (cells[oldIndex]) {
-            cells[oldIndex].classList.remove("player");
+        if (this.player) {
+            this.player.updatePosition(newRow, newCol);
         }
-
-        // Add player to the new position
-        if (cells[newIndex]) {
-            cells[newIndex].classList.add("player");
-        }
-
-        // Update player's new position
-        this.playerPosition = { row: newRow, col: newCol };
     }
 }
 

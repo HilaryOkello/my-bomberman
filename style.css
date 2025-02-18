@@ -12,7 +12,7 @@
   --game-border-radius: 12px;
   --header-height: 80px;
   --container-width: clamp(300px, 90vw, 1200px);
-  --board-width: clamp(280px, 80vw, 800px);
+  --board-width: 800px;
   --spacing-unit: clamp(0.5rem, 2vw, 2rem);
 }
 
@@ -123,9 +123,9 @@ body {
   display: grid;
   grid-template-columns: repeat(17, 1fr);
   grid-template-rows: repeat(13, 1fr);
-  gap: clamp(1px, 0.25vw, 2px);
+  /* gap: 2px; */
   background-color: var(--surface-color);
-  padding: clamp(0.5rem, 2vw, 1rem);
+  /* padding: 1rem; */
   border-radius: var(--game-border-radius);
   box-shadow: var(--card-shadow);
 }
