@@ -3,114 +3,126 @@ import gameController from './activatePlayer.js';
 import gameBoard from './gameBoard.js';
 
 let bombActive = false;
+let explosionTimeout = null;
+let cleanupTimeout = null;
 
 export function placeBomb() {
-    if (!gameController.isPlaying || gameController.isPaused) {
-        console.warn('Game is not active. Cannot place bomb.');
-        return;
-    }
-
-    if (bombActive) {
-        console.warn('Bomb is already active. Wait for it to explode.');
-        return;
-    }
+    if (!gameController.isPlaying || gameController.isPaused || bombActive) return;
 
     const bombX = gameController.player.position.x;
     const bombY = gameController.player.position.y;
 
-    if (bombX == 1 && bombY == 1) return;
+    if (bombX === 1 && bombY === 1) return;
 
+    // Cache DOM query
     const bombCell = document.querySelector(`[data-x="${bombX}"][data-y="${bombY}"]`);
-
     if (!bombCell || bombCell.classList.contains('bomb')) return;
 
+    // Single class addition
     bombCell.classList.add('bomb');
     bombActive = true;
 
-    setTimeout(() => explodeBomb(bombX, bombY), 1500);
+    // Store timeout reference for cleanup
+    explosionTimeout = setTimeout(() => {
+        explodeBomb(bombX, bombY, bombCell);
+    }, 1500);
 }
 
-function explodeBomb(x, y) {
-    const explosionCells = [
-        { x: x, y: y, type: 'center' },
-        { x: x + 1, y: y, type: 'horizontal' },
-        { x: x - 1, y: y, type: 'horizontal' },
-        { x: x, y: y + 1, type: 'vertical' },
-        { x: x, y: y - 1, type: 'vertical' }
-    ];
+function explodeBomb(x, y, bombCell) {
+    // Pre-calculate explosion cells
+    const explosionCells = getExplosionCells(x, y);
 
-    let playerHit = false; // Flag to prevent multiple player hits
+    // Batch DOM reads
+    const cellElements = explosionCells.map(cell => ({
+        ...cell,
+        element: document.querySelector(`[data-x="${cell.x}"][data-y="${cell.y}"]`)
+    })).filter(cell => cell.element && !cell.element.classList.contains('wall'));
 
-    explosionCells.forEach(cell => {
-        const targetCell = document.querySelector(`[data-x="${cell.x}"][data-y="${cell.y}"]`);
-        if (!targetCell) return;
+    // Batch DOM writes
+    cellElements.forEach(({ element, type }) => {
+        element.classList.add('explosion');
+        element.style.backgroundImage = getExplosionImage(type);
 
-        // Stop explosion if it hits an unbreakable wall
-        if (targetCell.classList.contains('wall')) return;
-
-        // Apply explosion effect with correct image
-        targetCell.classList.add('explosion');
-
-        if (cell.type === 'center') {
-            targetCell.style.backgroundImage = "url('./images/explosion_base.png')";
-        } else if (cell.type === 'horizontal') {
-            targetCell.style.backgroundImage = "url('./images/explosion_horizontal.png')";
-        } else if (cell.type === 'vertical') {
-            targetCell.style.backgroundImage = "url('./images/explosion_vertical.png')";
-        }
-        // scoreManager.addTimeBonus(SCORE_CONFIG.TIME_BONUS_FACTOR);
-
-        // Handle player hit
-        if (targetCell == gameController.player.getCurrentCell() && !playerHit) {
-            playerHit = true;
-            reducePlayerLives();
-            gameController.player.resetToStart()
-        }
-
-        // Handle enemy hit (if applicable)
-        const enemyInCell = targetCell.querySelector('.enemy');
-        if (enemyInCell) {
-            // Remove from DOM
-            enemyInCell.parentElement.remove();
-
-            // Remove from gameController.enemies array
-            const enemyX = parseInt(targetCell.getAttribute('data-x'));
-            const enemyY = parseInt(targetCell.getAttribute('data-y'));
-            gameController.enemies = gameController.enemies.filter(enemy =>
-                !(enemy.x === enemyX && enemy.y === enemyY)
-            );
-
-            scoreManager.addPoints(SCORE_CONFIG.ENEMY_DEFEATED);
-            gameController.enemyDefeated();
-        }
-
-        // Remove explosion effect after 500ms
-        setTimeout(() => {
-            // Handle breakable walls (remove them)
-            if (targetCell.classList.contains('breakable')) {
-                targetCell.classList.remove('breakable');
-                gameBoard.updateCell(cell.x, cell.y, 'empty');
-            }
-            targetCell.classList.remove('explosion');
-            targetCell.style.backgroundImage = "";
-            // gameBoard.updateCell(cell.x, cell.y, 'empty');
-        }, 500);
+        checkCollisions(element);
     });
 
-    // Remove bomb itself
-    const bombCell = document.querySelector(`[data-x="${x}"][data-y="${y}"]`);
-    if (bombCell) {
-        bombCell.classList.remove('bomb');
-        bombCell.classList.add('explosion');
-        bombCell.style.backgroundImage = "url('./images/explosion_base.png')";
+    // Schedule cleanup
+    cleanupTimeout = setTimeout(() => cleanupExplosion(cellElements, bombCell), 500);
 
-        setTimeout(() => {
-            bombCell.classList.remove('explosion');
-            bombCell.style.backgroundImage = "";
-            gameBoard.updateCell(x, y, 'empty');
-            bombActive = false;
-        }, 500);
+    bombActive = false;
+}
+
+function getExplosionCells(x, y) {
+    return [
+        { x, y, type: 'center' },
+        { x: x + 1, y, type: 'horizontal' },
+        { x: x - 1, y, type: 'horizontal' },
+        { x, y: y + 1, type: 'vertical' },
+        { x, y: y - 1, type: 'vertical' }
+    ];
+}
+
+function getExplosionImage(type) {
+    const images = {
+        center: "url('./images/explosion_base.png')",
+        horizontal: "url('./images/explosion_horizontal.png')",
+        vertical: "url('./images/explosion_vertical.png')"
+    };
+    return images[type];
+}
+
+function checkCollisions(cell) {
+    // Check player collision
+    if (cell === gameController.player.getCurrentCell()) {
+        reducePlayerLives();
+        gameController.player.resetToStart();
     }
+
+    // Check enemy collision
+    const enemyInCell = cell.querySelector('.enemy');
+    if (enemyInCell) {
+        handleEnemyDefeat(enemyInCell, cell);
+    }
+}
+
+function handleEnemyDefeat(enemyElement, cell) {
+    // Remove enemy
+    enemyElement.parentElement.remove();
+    // Update game state
+    const enemyX = parseInt(cell.dataset.x);
+    const enemyY = parseInt(cell.dataset.y);
+    gameController.enemies = gameController.enemies.filter(enemy =>
+        !(enemy.x === enemyX && enemy.y === enemyY)
+    );
+
+    scoreManager.addPoints(SCORE_CONFIG.ENEMY_DEFEATED);
+    gameController.enemyDefeated();
+}
+
+function cleanupExplosion(cellElements, bombCell) {
+    cellElements.forEach(({ element }) => {
+        if (element.classList.contains('breakable')) {
+            element.classList.remove('breakable');
+            gameBoard.updateCell(
+                parseInt(element.dataset.x),
+                parseInt(element.dataset.y),
+                'empty'
+            );
+        }
+        element.classList.remove('explosion');
+        element.style.backgroundImage = '';
+    });
+
+    // Clean up bomb cell
+    bombCell.classList.remove('bomb', 'explosion');
+    bombCell.style.backgroundImage = '';
+}
+
+export function cleanup() {
+    // Clear any pending timeouts
+    if (explosionTimeout) clearTimeout(explosionTimeout);
+    if (cleanupTimeout) clearTimeout(cleanupTimeout);
+    bombActive = false;
 }
 
 export function reducePlayerLives() {
@@ -146,12 +158,6 @@ function gameOver() {
             enemy.parentElement.remove();
         }
     });
-
-    // Remove player from the board
-    const playerCell = document.querySelector('.player');
-    if (playerCell) {
-        playerCell.classList.remove('player');
-    }
 
     document.getElementById('game-over-screen').classList.remove('hidden');
 }
