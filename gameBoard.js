@@ -13,26 +13,29 @@ class GameBoard {
     }
 
     initializeBoard() {
-        // Update grid template in CSS
-        // this.gameElement.style.gridTemplateColumns = `repeat(${this.width}, 40px)`;
-        // this.gameElement.style.gridTemplateRows = `repeat(${this.height}, 40px)`;
-
-        // Clear existing board
+        // Create a document fragment to batch DOM operations
+        const fragment = document.createDocumentFragment();
         this.gameElement.innerHTML = '';
         this.board = [];
 
-        // Create board array
         for (let y = 0; y < this.height; y++) {
             const row = [];
             for (let x = 0; x < this.width; x++) {
                 let cellType = this.determineInitialCellType(x, y);
-                // row.push(cellType);
-                let isWalkable = cellType == 'empty';
-                row.push({ type: cellType, walkable: isWalkable});
-                this.createCell(x, y, cellType);
+                let isWalkable = cellType === 'empty';
+                row.push({ type: cellType, walkable: isWalkable });
+
+                const cell = document.createElement('div');
+                cell.className = `cell ${cellType}`;
+                cell.dataset.x = x;
+                cell.dataset.y = y;
+                fragment.appendChild(cell);
             }
             this.board.push(row);
         }
+
+        // Single DOM update
+        this.gameElement.appendChild(fragment);
     }
 
     determineInitialCellType(x, y) {
@@ -75,13 +78,13 @@ class GameBoard {
         return false;
     }
 
-    createCell(x, y, type) {
-        const cell = document.createElement('div');
-        cell.className = `cell ${type}`;
-        cell.dataset.x = x;
-        cell.dataset.y = y;
-        this.gameElement.appendChild(cell);
-    }
+    // createCell(x, y, type) {
+    //     const cell = document.createElement('div');
+    //     cell.className = `cell ${type}`;
+    //     cell.dataset.x = x;
+    //     cell.dataset.y = y;
+    //     this.gameElement.appendChild(cell);
+    // }
 
     getCellAt(x, y) {
         if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
@@ -94,7 +97,7 @@ class GameBoard {
         if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
             // this.board[y][x] = newType;
             let isWalkable = newType == 'empty';
-            this.board[y][x] = { type: newType, walkable: isWalkable};
+            this.board[y][x] = { type: newType, walkable: isWalkable };
 
             // const cellElement = this.gameElement.children[y * this.width + x];
             // cellElement.className = `cell ${newType}`;
