@@ -15,8 +15,8 @@ export function placeBomb() {
         return;
     }
 
-    const bombX = gameController.playerPosition.row;
-    const bombY = gameController.playerPosition.col;
+    const bombX = gameController.player.position.x;
+    const bombY = gameController.player.position.y;
 
     if (bombX == 1 && bombY == 1) return;
 
@@ -61,19 +61,27 @@ function explodeBomb(x, y) {
         // scoreManager.addTimeBonus(SCORE_CONFIG.TIME_BONUS_FACTOR);
 
         // Handle player hit
-        if (targetCell.classList.contains('player') && !playerHit) {
+        if (targetCell == gameController.player.getCurrentCell() && !playerHit) {
             playerHit = true;
             reducePlayerLives();
-            targetCell.classList.remove('player');
-            gameController.updatePlayerPosition(1, 1);
+            gameController.player.resetToStart()
         }
 
         // Handle enemy hit (if applicable)
         const enemyInCell = targetCell.querySelector('.enemy');
         if (enemyInCell) {
+            // Remove from DOM
             enemyInCell.parentElement.remove();
+
+            // Remove from gameController.enemies array
+            const enemyX = parseInt(targetCell.getAttribute('data-x'));
+            const enemyY = parseInt(targetCell.getAttribute('data-y'));
+            gameController.enemies = gameController.enemies.filter(enemy =>
+                !(enemy.x === enemyX && enemy.y === enemyY)
+            );
+
             scoreManager.addPoints(SCORE_CONFIG.ENEMY_DEFEATED);
-            gameController.enemyDefeated() 
+            gameController.enemyDefeated();
         }
 
         // Remove explosion effect after 500ms
@@ -123,13 +131,13 @@ function gameOver() {
     // Stop game
     gameController.stopGame();
 
-        // Clear any remaining intervals
-        if (window.collisionCheckInterval) {
-            clearInterval(window.collisionCheckInterval);
-        }
-        if (window.enemyMoveInterval) {
-            clearInterval(window.enemyMoveInterval);
-        }
+    // Clear any remaining intervals
+    if (window.collisionCheckInterval) {
+        clearInterval(window.collisionCheckInterval);
+    }
+    if (window.enemyMoveInterval) {
+        clearInterval(window.enemyMoveInterval);
+    }
 
     // Remove all enemies from the board
     const enemies = document.querySelectorAll('.enemy');
@@ -138,7 +146,7 @@ function gameOver() {
             enemy.parentElement.remove();
         }
     });
-    
+
     // Remove player from the board
     const playerCell = document.querySelector('.player');
     if (playerCell) {
