@@ -1,5 +1,5 @@
 import gameBoard from "./gameBoard.js";
-import { reducePlayerLives } from "./bombPlacement.js";
+import { placeBomb, reducePlayerLives } from "./bombPlacement.js";
 import { spawnEnemies } from "./enemyPlacement.js";
 import { scoreManager } from "./scores.js";
 import { Player } from './player.js';
@@ -168,7 +168,19 @@ class GameController {
     }
 
     handleKeyPress(event) {
-        if (!this.isPlaying || this.isPaused) return;
+        if (!this.isPlaying) return;
+
+        if (event.key === 'p') {
+            if (this.isPaused) {
+                this.resumeGame();
+            } else {
+                this.pauseGame();
+            }
+            return
+        }
+
+        // Movement stop if game paused
+        if (this.isPaused) return;
 
         switch (event.key) {
             case "ArrowUp":
@@ -177,8 +189,8 @@ class GameController {
             case "ArrowRight":
                 this.movePlayer(event.key);
                 break;
-            case "Escape":
-                this.pauseGame();
+            case " ":
+                placeBomb();
                 break;
         }
     }
