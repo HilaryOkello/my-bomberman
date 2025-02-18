@@ -79,33 +79,16 @@ export function updateEnemy(enemy) {
 
 export function checkAllEnemiesCollision(enemies) {
     if (!enemies || enemies.length === 0) return
-    
+
     enemies.forEach(enemy => {
-        // Get current player position from DOM
-        const playerElement = document.querySelector('.player');
-        if (!playerElement) return;
-
-        // Get player coordinates from the cell containing the player
-        const playerCell = playerElement.closest('.cell');
-        if (!playerCell) return;
-
-        const playerX = parseInt(playerCell.getAttribute('data-x'));
-        const playerY = parseInt(playerCell.getAttribute('data-y'));
-
         // Check if enemy and player coordinates match
-        if (enemy.x === playerX && enemy.y === playerY) {
+        if (enemy.x === gameController.player.position.x && enemy.y === gameController.player.position.y) {
             handleCollision();
         }
     });
 }
 
 function handleCollision() {
-    // Remove player class from ALL cells to ensure no duplicate players
-    const allCells = document.querySelectorAll('.cell');
-    allCells.forEach(cell => {
-        cell.classList.remove('player');
-    });
-
     // Update player position to start
     gameController.updatePlayerPosition(1, 1);
 
