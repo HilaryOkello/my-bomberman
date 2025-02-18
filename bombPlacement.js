@@ -15,8 +15,8 @@ export function placeBomb() {
         return;
     }
 
-    const bombX = gameController.playerPosition.row;
-    const bombY = gameController.playerPosition.col;
+    const bombX = gameController.player.position.x;
+    const bombY = gameController.player.position.y;
 
     if (bombX == 1 && bombY == 1) return;
 
@@ -61,11 +61,10 @@ function explodeBomb(x, y) {
         // scoreManager.addTimeBonus(SCORE_CONFIG.TIME_BONUS_FACTOR);
 
         // Handle player hit
-        if (targetCell.classList.contains('player') && !playerHit) {
+        if (targetCell == gameController.player.getCurrentCell() && !playerHit) {
             playerHit = true;
             reducePlayerLives();
-            targetCell.classList.remove('player');
-            gameController.updatePlayerPosition(1, 1);
+            gameController.player.resetToStart()
         }
 
         // Handle enemy hit (if applicable)
