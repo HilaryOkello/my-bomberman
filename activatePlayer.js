@@ -148,13 +148,12 @@ class GameController {
             player.remove()
         }
 
-        // Clean up enemies
-        const cells = document.getElementsByClassName('cell');
-        for (let cell of cells) {
-            const enemyInCell = cell.querySelector('.enemy');
-            if (enemyInCell) {
-                enemyInCell.parentElement.remove();
-            }
+        // Clean up all enemies
+        if (this.enemies) {
+            // Remove enemy DOM elements
+            this.enemies.forEach(enemy => enemy.remove());
+            // Clear enemies array
+            this.enemies = [];
         }
     }
 
