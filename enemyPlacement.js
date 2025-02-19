@@ -1,12 +1,13 @@
+// enemyPlacement.js
 import gameBoard from "./gameBoard.js";
 import gameController from "./activatePlayer.js";
+import { Enemy } from './enemy.js';
 import { reducePlayerLives } from "./bombPlacement.js";
 
 export function spawnEnemies(numEnemies) {
     const enemies = [];
     for (let i = 0; i < numEnemies; i++) {
         let x, y;
-        // Keep trying until we find a valid position
         do {
             x = Math.floor(Math.random() * (gameBoard.width - 2)) + 1;
             y = Math.floor(Math.random() * (gameBoard.height - 2)) + 1;
@@ -16,15 +17,7 @@ export function spawnEnemies(numEnemies) {
             isNearOtherEnemy(x, y, enemies)
         );
 
-        // Create enemy object
-        const enemy = {
-            x,
-            y,
-            element: document.createElement("div")
-        };
-        enemy.element.classList.add("enemy");
-        updateEnemyPosition(enemy);
-        enemies.push(enemy);
+        enemies.push(new Enemy(x, y));
     }
     return enemies;
 }
@@ -35,86 +28,62 @@ function isNearPlayer(x, y) {
 
 function isNearOtherEnemy(x, y, enemies) {
     return enemies.some(enemy =>
-        Math.abs(enemy.x - x) < 2 &&
-        Math.abs(enemy.y - y) < 2
+        Math.abs(enemy.position.x - x) < 2 &&
+        Math.abs(enemy.position.y - y) < 2
     );
 }
 
-export function updateEnemyPosition(enemy) {
-    // Find the enemy's previous position and remove it
-    const prevCell = document.querySelector(`.enemy-container[data-x="${enemy.x}"][data-y="${enemy.y}"]`);
-    if (prevCell) {
-        prevCell.remove();
-    }
-
-    // Get the new cell for the enemy
-    const cell = document.querySelector(`[data-x="${enemy.x}"][data-y="${enemy.y}"]`);
-    if (cell) {
-        // Create and add the new enemy container
-        const enemyContainer = document.createElement("div");
-        enemyContainer.classList.add("enemy-container");
-        enemyContainer.setAttribute("data-x", enemy.x); // Store x position
-        enemyContainer.setAttribute("data-y", enemy.y); // Store y position
-
-        enemy.element.style.width = "100%";
-        enemy.element.style.height = "100%";
-        enemyContainer.appendChild(enemy.element);
-        cell.appendChild(enemyContainer);
-    }
-}
-
 export function updateEnemy(enemy) {
-    // Only update enemy position every second
-    const currentTime = performance.now();
-    if (!enemy.lastMoveTime || currentTime - enemy.lastMoveTime >= 1000) {
-        const validMoves = getValidMoves(enemy, gameController.enemies);
-        if (validMoves.length > 0) {
-            const move = validMoves[Math.floor(Math.random() * validMoves.length)];
-            enemy.x = move.x;
-            enemy.y = move.y;
-            enemy.lastMoveTime = currentTime;
-        }
+    if (!enemy.isMoving) {
+        const path = getMovementPath(enemy, gameController.enemies, 5);
+        enemy.startMoving(path);
     }
 }
 
 export function checkAllEnemiesCollision(enemies) {
-    if (!enemies || enemies.length === 0) return
+    if (!enemies || enemies.length === 0) return;
 
     enemies.forEach(enemy => {
-        // Check if enemy and player coordinates match
-        if (enemy.x === gameController.player.position.x && enemy.y === gameController.player.position.y) {
+        if (enemy.position.x === gameController.player.position.x &&
+            enemy.position.y === gameController.player.position.y) {
             handleCollision();
         }
     });
 }
 
 function handleCollision() {
-    // Update player position to start
     gameController.updatePlayerPosition(1, 1);
-
-    // Reduce lives
     reducePlayerLives();
 }
 
 function getValidMoves(enemy, allEnemies) {
     const directions = [
-        { x: 1, y: 0 },  // Right
-        { x: -1, y: 0 }, // Left
-        { x: 0, y: 1 },  // Down
-        { x: 0, y: -1 }  // Up
+        { x: 1, y: 0 },
+        { x: -1, y: 0 },
+        { x: 0, y: 1 },
+        { x: 0, y: -1 }
     ];
 
     return directions
         .map(dir => ({
-            x: enemy.x + dir.x,
-            y: enemy.y + dir.y
+            x: enemy.position.x + dir.x,
+            y: enemy.position.y + dir.y
         }))
         .filter(pos =>
+            !(pos.x === 1 && pos.y === 1) &&
             pos.x > 0 &&
             pos.x < gameBoard.width - 1 &&
             pos.y > 0 &&
             pos.y < gameBoard.height - 1 &&
             gameBoard.isWalkable(pos.x, pos.y) &&
+            // Prevent moving into a cell reserved by another enemy
+            !allEnemies.some(other =>
+                other !== enemy &&
+                other.destination &&
+                other.destination.x === pos.x &&
+                other.destination.y === pos.y
+            ) &&
+            // Existing check for enemy overlap on the board
             !isPositionOccupiedByEnemy(pos, allEnemies, enemy)
         );
 }
@@ -122,19 +91,27 @@ function getValidMoves(enemy, allEnemies) {
 function isPositionOccupiedByEnemy(position, enemies, currentEnemy) {
     return enemies.some(enemy =>
         enemy !== currentEnemy &&
-        enemy.x === position.x &&
-        enemy.y === position.y
+        enemy.position.x === position.x &&
+        enemy.position.y === position.y
     );
 }
 
-export function cleanupEnemies() {
-    if (window.enemyMoveInterval) {
-        clearInterval(window.enemyMoveInterval);
-        window.enemyMoveInterval = null;
+function getMovementPath(enemy, allEnemies, steps) {
+    let path = [];
+    let tempX = enemy.position.x;
+    let tempY = enemy.position.y;
+
+    for (let i = 0; i < steps; i++) {
+        const validMoves = getValidMoves({ position: { x: tempX, y: tempY } }, allEnemies);
+        if (validMoves.length > 0) {
+            const move = validMoves[Math.floor(Math.random() * validMoves.length)];
+            path.push(move);
+            tempX = move.x;
+            tempY = move.y;
+        } else {
+            break;
+        }
     }
 
-    if (window.collisionCheckInterval) {
-        clearInterval(window.collisionCheckInterval);
-        window.collisionCheckInterval = null;
-    }
+    return path;
 }
