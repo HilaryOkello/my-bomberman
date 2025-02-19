@@ -102,4 +102,7 @@ export class Player {
     resetToStart() {
         this.updatePosition(1, 1);
     }
+    remove() {
+        this.element.remove();
+    }
 }
