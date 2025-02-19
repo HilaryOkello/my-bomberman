@@ -34,8 +34,12 @@ function isNearOtherEnemy(x, y, enemies) {
 }
 
 export function updateEnemy(enemy) {
+    // if (!enemy.isMoving) {
+    //     const path = getMovementPath(enemy, gameController.enemies, 5);
+    //     enemy.startMoving(path);
+    // }
     if (!enemy.isMoving) {
-        const path = getMovementPath(enemy, gameController.enemies, 5);
+        const path = getMovementPath(enemy, gameController.enemies, 3);
         enemy.startMoving(path);
     }
 }
@@ -100,18 +104,45 @@ function getMovementPath(enemy, allEnemies, steps) {
     let path = [];
     let tempX = enemy.position.x;
     let tempY = enemy.position.y;
-
+    
+    // Get player position from game controller
+    const playerPos = gameController.player.position;
+    
     for (let i = 0; i < steps; i++) {
         const validMoves = getValidMoves({ position: { x: tempX, y: tempY } }, allEnemies);
         if (validMoves.length > 0) {
-            const move = validMoves[Math.floor(Math.random() * validMoves.length)];
-            path.push(move);
-            tempX = move.x;
-            tempY = move.y;
+            // Choose move that gets closer to player
+            const bestMove = getBestMoveTowardsPlayer(validMoves, playerPos);
+            path.push(bestMove);
+            tempX = bestMove.x;
+            tempY = bestMove.y;
         } else {
             break;
         }
     }
-
+    
     return path;
+}
+
+// getBestMoveTowardsPlayer function to determine best move towards player
+function getBestMoveTowardsPlayer(validMoves, playerPos) {
+    // Calculate distance from each possible move to the player
+    const movesWithDistance = validMoves.map(move => {
+        const distance = Math.sqrt(
+            Math.pow(move.x - playerPos.x, 2) + 
+            Math.pow(move.y - playerPos.y, 2)
+        );
+        return { move, distance };
+    });
+    
+    // Sort by distance (closest first)
+    movesWithDistance.sort((a, b) => a.distance - b.distance);
+    
+    // Add randomness - 70% chance to choose closest move, 30% chance for random move
+    if (Math.random() < 0.7) {
+        return movesWithDistance[0].move;
+    } else {
+        // Random move from valid options
+        return validMoves[Math.floor(Math.random() * validMoves.length)];
+    }
 }
