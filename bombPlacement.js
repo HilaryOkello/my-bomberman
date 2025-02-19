@@ -72,6 +72,9 @@ function getExplosionImage(type) {
 }
 
 function checkCollisions(cell) {
+    const cellX = parseInt(cell.dataset.x);
+    const cellY = parseInt(cell.dataset.y);
+
     // Check player collision
     if (cell === gameController.player.getCurrentCell()) {
         reducePlayerLives();
@@ -79,22 +82,25 @@ function checkCollisions(cell) {
     }
 
     // Check enemy collision
-    const enemyInCell = cell.querySelector('.enemy');
-    if (enemyInCell) {
-        handleEnemyDefeat(enemyInCell, cell);
+    if (gameController.enemies) {
+        const defeatedEnemy = gameController.enemies.find(enemy =>
+            enemy.position.x === cellX && enemy.position.y === cellY
+        );
+
+        if (defeatedEnemy) {
+            handleEnemyDefeat(defeatedEnemy);
+        }
     }
 }
 
-function handleEnemyDefeat(enemyElement, cell) {
-    // Remove enemy
-    enemyElement.parentElement.remove();
-    // Update game state
-    const enemyX = parseInt(cell.dataset.x);
-    const enemyY = parseInt(cell.dataset.y);
-    gameController.enemies = gameController.enemies.filter(enemy =>
-        !(enemy.x === enemyX && enemy.y === enemyY)
-    );
-
+function handleEnemyDefeat(enemy) {
+    // Remove the enemy's DOM element
+    enemy.remove();
+    
+    // Remove from game controller's enemies array
+    gameController.enemies = gameController.enemies.filter(e => e !== enemy);
+    
+    // Update score and check win condition
     scoreManager.addPoints(SCORE_CONFIG.ENEMY_DEFEATED);
     gameController.enemyDefeated();
 }
