@@ -139,10 +139,17 @@ class GameController {
     }
 
     handleKeyPress(event) {
-        if (!this.isPlaying || this.isPaused) return;
+        if (!this.isPlaying) return;
+
+        // Allow 'p' key to toggle pause/resume even when paused
+        if (event.key === 'p') {
+            return this.isPaused ? this.resumeGame() : this.pauseGame();
+        }
+
+        if (this.isPaused) return;
 
         switch (event.key) {
-            case 'p': return this.isPaused ? this.resumeGame() : this.pauseGame();
+            // case 'p': return this.isPaused ? this.resumeGame() : this.pauseGame();
             case 'ArrowUp': case 'ArrowDown': case 'ArrowLeft': case 'ArrowRight':
                 return this.movePlayer(event.key);
             case ' ':
