@@ -97,9 +97,6 @@ body {
   border-radius: 4px;
   overflow: hidden;
   position: relative;
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  perspective: 1000px;
 }
 
 /* Cell styling */
@@ -109,9 +106,7 @@ body {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  transform: translateZ(0);
   contain: strict;
-  will-change: transform, opacity;
 }
 
 .wall {
@@ -126,31 +121,9 @@ body {
   background-image: url("./images/floor.png");
 }
 
-.player {
-  z-index: 10;
-  background-image: url("./images/player.png");
-  background-color: #574c37;
-}
-
 .bomb {
   background-image: url("./images/bomb.png");
   background-color: #574c37;
-  animation: pulse 1s infinite;
-  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  animation-fill-mode: both;
-}
-
-/* Power-ups */
-.powerup-bomb {
-  background-image: url("./images/powerup-bomb.png");
-  animation: float 2s infinite;
-  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.powerup-speed {
-  background-image: url("./images/powerup-speed.png");
-  animation: float 2s infinite;
-  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Image preloading to prevent flash */
@@ -174,7 +147,7 @@ body::after {
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  pointer-events: none;
+  pointer-events: auto;
   transition: transform 0.1s ease;
   z-index: 10;
   will-change: transform;
@@ -188,7 +161,7 @@ body::after {
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  pointer-events: none;
+  pointer-events: auto;
   transition: none;
   z-index: 2;
   will-change: transform;
@@ -204,7 +177,6 @@ button {
   font-weight: bold;
   cursor: pointer;
   transition: background-color 0.2s;
-  transform: translateZ(0);
 }
 
 button:hover {
@@ -235,8 +207,6 @@ button:hover {
   z-index: 100;
   padding: 20px;
   text-align: center;
-  will-change: opacity;
-  transform: translateZ(0);
 }
 
 .overlay h1 {
@@ -268,15 +238,9 @@ button:hover {
 
 /* Optimized animations for game elements */
 @keyframes pulse {
-  0% { transform: scale(1) translateZ(0); }
-  50% { transform: scale(1.05) translateZ(0); }
-  100% { transform: scale(1) translateZ(0); }
-}
-
-@keyframes float {
-  0% { transform: translateY(0) translateZ(0); }
-  50% { transform: translateY(-5px) translateZ(0); }
-  100% { transform: translateY(0) translateZ(0); }
+  0% { filter: brightness(1); }
+  50% { filter: brightness(1.2); }
+  100% { filter: brightness(1); }
 }
 
 /* Explosion animation - optimized */
