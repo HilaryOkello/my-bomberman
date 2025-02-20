@@ -24,11 +24,6 @@
                 <div id="level">Level: 1</div>
             </div>
             <button id="pause-btn" class="pause-button">Pause</button>
-            <div id="pause-screen" class="overlay hidden">
-                <h2>Game Paused</h2>
-                <button id="resume-btn">Resume</button>
-                <button id="restart-btn">Restart</button>
-            </div>
         </div>
 
         <div id="game-board"></div>
@@ -39,9 +34,11 @@
                 <p>Use Arrow Keys to Move, Space to Plant Bombs</p>
                 <button id="start-btn">Start Game</button>
             </div>
-
-
-
+            <div id="pause-screen" class="overlay hidden">
+                <h2>Game Paused</h2>
+                <button id="resume-btn">Resume</button>
+                <button id="restart-btn">Restart</button>
+            </div>
             <div id="game-over-screen" class="overlay hidden">
                 <h2>You Lose</h2>
                 <p>Final Score: <span id="final-score">0</span></p>
