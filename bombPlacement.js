@@ -157,13 +157,5 @@ function gameOver() {
         clearInterval(window.enemyMoveInterval);
     }
 
-    // Remove all enemies from the board
-    const enemies = document.querySelectorAll('.enemy');
-    enemies.forEach(enemy => {
-        if (enemy.parentElement) {
-            enemy.parentElement.remove();
-        }
-    });
-
     document.getElementById('game-over-screen').classList.remove('hidden');
 }
