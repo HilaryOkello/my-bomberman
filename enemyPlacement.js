@@ -34,10 +34,6 @@ function isNearOtherEnemy(x, y, enemies) {
 }
 
 export function updateEnemy(enemy) {
-    // if (!enemy.isMoving) {
-    //     const path = getMovementPath(enemy, gameController.enemies, 5);
-    //     enemy.startMoving(path);
-    // }
     if (!enemy.isMoving) {
         const path = getMovementPath(enemy, gameController.enemies, 3);
         enemy.startMoving(path);
