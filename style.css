@@ -1,13 +1,11 @@
-/* style.css */
 /* Base styles and variables */
 :root {
-  --primary-color: black;
-  --secondary-color: #3b3b3b;
   --background-color: black;
+  --secondary-color: #3b3b3b;
   --surface-color: rgb(88, 87, 87);
   --text-color: #ffffff;
   --accent-color: #ff6b00;
-  --cell-size: 40px;
+  --cell-size: 30px;
   --border-radius: 8px;
 }
 
@@ -15,6 +13,16 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+.game-name {
+  text-align: center;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 2.3rem;
+  color: #ffcc00; 
+  text-shadow: 3px 3px 0 #ff5733, 6px 6px 0 #c70039;
+  border-radius: 10px;
+  display: inline-block;
 }
 
 body {
@@ -90,7 +98,7 @@ body {
   overflow: hidden;
   position: relative;
   transform: translateZ(0);
-  /* backface-visibility: hidden; */
+  backface-visibility: hidden;
   perspective: 1000px;
 }
 
@@ -106,7 +114,6 @@ body {
   will-change: transform, opacity;
 }
 
-/* Cell types - pre-loaded to avoid paint flashes */
 .wall {
   background-image: url("./images/wall.png");
 }
@@ -133,13 +140,6 @@ body {
   animation-fill-mode: both;
 }
 
-.enemy {
-  z-index: 5;
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  will-change: transform;
-}
-
 /* Power-ups */
 .powerup-bomb {
   background-image: url("./images/powerup-bomb.png");
@@ -162,23 +162,36 @@ body::after {
   z-index: -1;
   content: url("./images/wall.png") url("./images/breakable.png") 
            url("./images/floor.png") url("./images/player.png")
-           url("./images/bomb.png") url("./images/powerup-bomb.png")
-           url("./images/powerup-speed.png") url("./images/enemy.png");
+           url("./images/bomb.png")  url("./images/enemy.png");
 }
 
 /* Player element styling */
 #player {
+  width: var(--cell-size);
+  height: var(--cell-size);
   position: absolute;
   background-image: url('./images/player.png');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
   pointer-events: none;
+  transition: transform 0.1s ease;
   z-index: 10;
   will-change: transform;
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.enemy {
+  width: var(--cell-size);
+  height: var(--cell-size);
+  position: absolute;
+  background-image: url('./images/enemy.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  pointer-events: none;
+  transition: none;
+  z-index: 2;
+  will-change: transform;
 }
 
 /* Buttons */
@@ -218,7 +231,7 @@ button:hover {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-color: rgba(0, 0, 0, 0.85);
+  background-color: rgba(0, 0, 0, 0.5);
   z-index: 100;
   padding: 20px;
   text-align: center;
@@ -282,9 +295,6 @@ button:hover {
 
 /* Responsive design */
 @media (max-width: 768px) {
-  :root {
-    --cell-size: 30px;
-  }
   
   .game-header {
     flex-direction: column;
@@ -306,9 +316,6 @@ button:hover {
 }
 
 @media (max-width: 480px) {
-  :root {
-    --cell-size: 22px;
-  }
   
   #score {
     font-size: 1.4rem;
