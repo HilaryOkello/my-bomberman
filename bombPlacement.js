@@ -1,6 +1,7 @@
 import { scoreManager, SCORE_CONFIG } from './scores.js';
 import gameController from './activatePlayer.js';
 import gameBoard from './gameBoard.js';
+import { CELL_TYPES } from './state.js';
 
 let bombActive = false;
 let explosionTimeout = null;
@@ -14,118 +15,75 @@ export function placeBomb() {
 
     if (bombX === 1 && bombY === 1) return;
 
-    // Cache DOM query
-    const bombCell = document.querySelector(`[data-x="${bombX}"][data-y="${bombY}"]`);
-    if (!bombCell || bombCell.classList.contains('bomb')) return;
+    if (gameBoard.boardState.getCellType(bombX, bombY) === CELL_TYPES.BOMB) return;
 
-    // Single class addition
-    bombCell.classList.add('bomb');
+    // Set bomb state
+    gameBoard.boardState.setCellType(bombX, bombY, CELL_TYPES.BOMB);
+
+    // Move bomb element
+    gameBoard.bombElement.style.transform = `translate(${bombX * 30}px, ${bombY * 30}px)`;
+    gameBoard.bombElement.style.visibility = 'visible';
+
     bombActive = true;
 
-    // Store timeout reference for cleanup
     explosionTimeout = setTimeout(() => {
-        explodeBomb(bombX, bombY, bombCell);
+        explodeBomb(bombX, bombY);
     }, 1500);
 }
 
-function explodeBomb(x, y, bombCell) {
-    // Pre-calculate explosion cells
-    const explosionCells = getExplosionCells(x, y);
+function explodeBomb(x, y) {
+    const positions = [
+        { x, y, type: 'center' },
+        { x: x + 1, y, type: 'right' },
+        { x: x - 1, y, type: 'left' },
+        { x, y: y + 1, type: 'down' },
+        { x, y: y - 1, type: 'up' }
+    ];
 
-    // Batch DOM reads
-    const cellElements = explosionCells.map(cell => ({
-        ...cell,
-        element: document.querySelector(`[data-x="${cell.x}"][data-y="${cell.y}"]`)
-    })).filter(cell => cell.element && !cell.element.classList.contains('wall'));
-
-    // Batch DOM writes
-    cellElements.forEach(({ element, type }) => {
-        element.classList.add('explosion');
-        element.style.backgroundImage = getExplosionImage(type);
-
-        checkCollisions(element);
+    positions.forEach((pos, index) => {
+        gameBoard.explosionElements[index].style.transform = `translate(${pos.x * 30}px, ${pos.y * 30}px)`;
+        gameBoard.explosionElements[index].style.visibility = 'visible';
+        checkCollisions(pos.x, pos.y);
     });
 
-    // Schedule cleanup
-    cleanupTimeout = setTimeout(() => cleanupExplosion(cellElements, bombCell), 500);
-
+    cleanupTimeout = setTimeout(cleanupExplosion, 500);
     bombActive = false;
 }
 
-function getExplosionCells(x, y) {
-    return [
-        { x, y, type: 'center' },
-        { x: x + 1, y, type: 'horizontal' },
-        { x: x - 1, y, type: 'horizontal' },
-        { x, y: y + 1, type: 'vertical' },
-        { x, y: y - 1, type: 'vertical' }
-    ];
-}
-
-function getExplosionImage(type) {
-    const images = {
-        center: "url('./images/explosion_base.png')",
-        horizontal: "url('./images/explosion_horizontal.png')",
-        vertical: "url('./images/explosion_vertical.png')"
-    };
-    return images[type];
-}
-
-function checkCollisions(cell) {
-    const cellX = parseInt(cell.dataset.x);
-    const cellY = parseInt(cell.dataset.y);
-
-    // Check player collision
-    if (cell === gameController.player.getCurrentCell()) {
+function checkCollisions(x, y) {
+    if (gameController.player.position.x === x && gameController.player.position.y === y) {
         reducePlayerLives();
         gameController.player.resetToStart();
     }
 
-    // Check enemy collision
-    if (gameController.enemies) {
-        const defeatedEnemy = gameController.enemies.find(enemy =>
-            enemy.position.x === cellX && enemy.position.y === cellY
-        );
-
-        if (defeatedEnemy) {
-            handleEnemyDefeat(defeatedEnemy);
+    gameController.enemies.forEach(enemy => {
+        if (enemy.position.x === x && enemy.position.y === y) {
+            handleEnemyDefeat(enemy);
         }
-    }
+    });
 }
 
 function handleEnemyDefeat(enemy) {
-    // Remove the enemy's DOM element
-    enemy.remove();
-    
-    // Remove from game controller's enemies array
+    enemy.deactivate();
     gameController.enemies = gameController.enemies.filter(e => e !== enemy);
-    
-    // Update score and check win condition
     scoreManager.addPoints(SCORE_CONFIG.ENEMY_DEFEATED);
     gameController.enemyDefeated();
 }
 
-function cleanupExplosion(cellElements, bombCell) {
-    cellElements.forEach(({ element }) => {
-        if (element.classList.contains('breakable')) {
-            element.classList.remove('breakable');
-            gameBoard.updateCell(
-                parseInt(element.dataset.x),
-                parseInt(element.dataset.y),
-                'empty'
-            );
-        }
-        element.classList.remove('explosion');
-        element.style.backgroundImage = '';
-    });
+function cleanupExplosion() {
+    gameBoard.boardState.setCellType(
+        parseInt(gameBoard.bombElement.style.transform.split('(')[1]) / 30,
+        parseInt(gameBoard.bombElement.style.transform.split(', ')[1]) / 30,
+        CELL_TYPES.EMPTY
+    );
 
-    // Clean up bomb cell
-    bombCell.classList.remove('bomb', 'explosion');
-    bombCell.style.backgroundImage = '';
+    gameBoard.bombElement.style.visibility = 'hidden';
+    gameBoard.explosionElements.forEach(explosion => {
+        explosion.style.visibility = 'hidden';
+    });
 }
 
 export function cleanup() {
-    // Clear any pending timeouts
     if (explosionTimeout) clearTimeout(explosionTimeout);
     if (cleanupTimeout) clearTimeout(cleanupTimeout);
     bombActive = false;
@@ -146,16 +104,8 @@ export function reducePlayerLives() {
 }
 
 function gameOver() {
-    // Stop game
     gameController.stopGame();
-
-    // Clear any remaining intervals
-    if (window.collisionCheckInterval) {
-        clearInterval(window.collisionCheckInterval);
-    }
-    if (window.enemyMoveInterval) {
-        clearInterval(window.enemyMoveInterval);
-    }
-
+    if (window.collisionCheckInterval) clearInterval(window.collisionCheckInterval);
+    if (window.enemyMoveInterval) clearInterval(window.enemyMoveInterval);
     document.getElementById('game-over-screen').classList.remove('hidden');
 }
