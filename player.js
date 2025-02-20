@@ -3,23 +3,13 @@ export class Player {
     constructor() {
         this.position = { x: 1, y: 1 };
         this.element = this.createPlayerElement();
-        this.cellSize = 0;
+        this.cellSize = 30;
         this.initialize();
     }
 
     createPlayerElement() {
         const player = document.createElement('div');
         player.id = 'player';
-        player.style.cssText = `
-            position: absolute;
-            background-image: url('./images/player.png');
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            pointer-events: none;
-            transition: transform 0.1s ease;
-            z-index: 10;
-        `;
         return player;
     }
 
@@ -27,15 +17,6 @@ export class Player {
         // Get the game board and append the player
         const gameBoard = document.getElementById('game-board');
         if (!gameBoard) return;
-
-        // Calculate cell size from an existing cell
-        const cell = gameBoard.querySelector('.cell');
-        if (cell) {
-            const rect = cell.getBoundingClientRect();
-            this.cellSize = rect.width;
-            this.element.style.width = this.cellSize + 'px';
-            this.element.style.height = this.cellSize + 'px';
-        }
 
         // Set initial position
         this.updatePosition(this.position.x, this.position.y);
