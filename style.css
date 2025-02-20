@@ -122,8 +122,10 @@ body {
 }
 
 .bomb {
+  z-index: 10;
+  width: var(--cell-size);
+  height: var(--cell-size);
   background-image: url("./images/bomb.png");
-  background-color: #574c37;
 }
 
 /* Image preloading to prevent flash */
@@ -245,9 +247,12 @@ button:hover {
 
 /* Explosion animation - optimized */
 .explosion {
-  background-image: url("./images/explosion.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  pointer-events: auto;
   animation: explode 0.5s forwards;
-  z-index: 5;
+  z-index: 10;
   will-change: transform, opacity;
 }
 
