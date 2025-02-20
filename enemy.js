@@ -1,32 +1,61 @@
 // enemy.js
 export class Enemy {
-    constructor(x, y) {
-        this.position = { x, y };
+    constructor() {
+        this.position = { x: 0, y: 0 };
         this.element = this.createEnemyElement();
         this.cellSize = 30;
         this.isMoving = false;
-        this.path = [];      // Array of target cell positions
-        this.stepIndex = 0;  // Current index in the path
-        this.moveDuration = 500; // Duration (ms) to move between cells
-        this.moveStartTime = 0;  // Timestamp when the current move started
-        this.movingFrom = { x, y }; // Starting cell for current move
-        this.movingTo = null;       // Target cell for current move
+        this.path = [];
+        this.stepIndex = 0;
+        this.moveDuration = 500;
+        this.moveStartTime = 0;
+        this.movingFrom = { x: 0, y: 0 };
+        this.movingTo = null;
+        this.active = false;
         this.initialize();
     }
 
     createEnemyElement() {
         const enemy = document.createElement('div');
         enemy.className = 'enemy';
+        enemy.style.visibility = 'hidden'; // Start hidden
         return enemy;
     }
 
     initialize() {
         const gameBoard = document.getElementById('game-board');
         if (!gameBoard) return;
-
-        // Set initial position
-        this.updatePosition(this.position.x, this.position.y);
         gameBoard.appendChild(this.element);
+    }
+
+    activate(x, y) {
+        this.position = { x, y };
+        this.updatePosition(x, y);
+        this.show();
+        this.active = true;
+        this.isMoving = false;
+        this.path = [];
+        this.stepIndex = 0;
+    }
+
+    deactivate() {
+        this.hide();
+        this.active = false;
+        this.isMoving = false;
+        this.path = [];
+    }
+
+    show() {
+        this.element.style.visibility = 'visible';
+    }
+
+    hide() {
+        this.element.style.visibility = 'hidden';
+    }
+
+    // Modified remove to just hide instead of removing from DOM
+    remove() {
+        this.deactivate();
     }
 
     startMoving(path) {
