@@ -3,7 +3,7 @@ export class Enemy {
     constructor(x, y) {
         this.position = { x, y };
         this.element = this.createEnemyElement();
-        this.cellSize = 0;
+        this.cellSize = 30;
         this.isMoving = false;
         this.path = [];      // Array of target cell positions
         this.stepIndex = 0;  // Current index in the path
@@ -17,32 +17,12 @@ export class Enemy {
     createEnemyElement() {
         const enemy = document.createElement('div');
         enemy.className = 'enemy';
-        enemy.style.cssText = `
-            position: absolute;
-            background-image: url('./images/enemy.png');
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            pointer-events: none;
-            transition: none;
-            width: 100%;
-            height: 100%;
-            z-index: 2;
-        `;
         return enemy;
     }
 
     initialize() {
         const gameBoard = document.getElementById('game-board');
         if (!gameBoard) return;
-
-        const cell = gameBoard.querySelector('.cell');
-        if (cell) {
-            const rect = cell.getBoundingClientRect();
-            this.cellSize = rect.width;
-            this.element.style.width = this.cellSize + 'px';
-            this.element.style.height = this.cellSize + 'px';
-        }
 
         // Set initial position
         this.updatePosition(this.position.x, this.position.y);
