@@ -19,7 +19,7 @@
   text-align: center;
   font-family: 'Press Start 2P', cursive;
   font-size: 2.3rem;
-  color: #ffcc00; 
+  color: #ffcc00;
   text-shadow: 3px 3px 0 #ff5733, 6px 6px 0 #c70039;
   border-radius: 10px;
   display: inline-block;
@@ -142,11 +142,13 @@ body {
   background-image: url('./images/explosion_base.png');
 }
 
-.explosion-right, .explosion-left {
+.explosion-right,
+.explosion-left {
   background-image: url('./images/explosion_horizontal.png');
 }
 
-.explosion-up, .explosion-down {
+.explosion-up,
+.explosion-down {
   background-image: url('./images/explosion_vertical.png');
 }
 
@@ -163,11 +165,7 @@ body::after {
   height: 0;
   overflow: hidden;
   z-index: -1;
-  content: url("./images/wall.png") url("./images/breakable.png") 
-           url("./images/floor.png") url("./images/player.png")
-           url("./images/bomb.png")  url("./images/enemy.png")
-           url("./images/explosion_base.png") url("./images/explosion_horizontal.png")
-           url("./images/explosion_vertical.png");
+  content: url("./images/wall.png") url("./images/breakable.png") url("./images/floor.png") url("./images/player.png") url("./images/bomb.png") url("./images/enemy.png") url("./images/explosion_base.png") url("./images/explosion_horizontal.png") url("./images/explosion_vertical.png");
 }
 
 /* Player element styling */
@@ -268,66 +266,41 @@ button:hover {
   display: none;
 }
 
-/* Optimized animations for game elements */
-@keyframes pulse {
-  0% { filter: brightness(1); }
-  50% { filter: brightness(1.2); }
-  100% { filter: brightness(1); }
-}
-
-/* Explosion animation - optimized */
-/* .explosion {
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  pointer-events: auto;
-  animation: explode 0.5s forwards;
-  z-index: 10;
-  will-change: transform, opacity;
-}
-
-@keyframes explode {
-  0% { opacity: 0; transform: scale(0.5) translateZ(0); }
-  50% { opacity: 1; transform: scale(1.2) translateZ(0); }
-  100% { opacity: 0; transform: scale(1.5) translateZ(0); }
-} */
-
-/* Responsive design */
 @media (max-width: 768px) {
-  
+
   .game-header {
     flex-direction: column;
     gap: 10px;
   }
-  
+
   .game-stats {
     flex-wrap: wrap;
     justify-content: center;
   }
-  
+
   .overlay h1 {
     font-size: 2rem;
   }
-  
+
   .overlay h2 {
     font-size: 1.8rem;
   }
 }
 
 @media (max-width: 480px) {
-  
+
   #score {
     font-size: 1.4rem;
   }
-  
+
   .game-stats div {
     font-size: 0.9rem;
   }
-  
+
   .overlay p {
     font-size: 1rem;
   }
-  
+
   .overlay button {
     padding: 8px 16px;
     font-size: 1rem;

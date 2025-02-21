@@ -111,8 +111,4 @@ export class Enemy {
         const translateY = y * this.cellSize;
         this.element.style.transform = `translate(${translateX}px, ${translateY}px)`;
     }
-
-    remove() {
-        this.element.remove();
-    }
 }
