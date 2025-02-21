@@ -10,11 +10,11 @@ export class Player {
     createPlayerElement() {
         const player = document.createElement('div');
         player.id = 'player';
+        player.style.visibility = 'hidden'; // Start hidden
         return player;
     }
 
     initialize() {
-        // Get the game board and append the player
         const gameBoard = document.getElementById('game-board');
         if (!gameBoard) return;
 
@@ -26,15 +26,26 @@ export class Player {
         gameBoard.appendChild(this.element);
     }
 
+    show() {
+        this.element.style.visibility = 'visible';
+    }
+
+    hide() {
+        this.element.style.visibility = 'hidden';
+    }
+
+    // Other methods remain the same
     updatePosition(x, y) {
-        // Update internal position
         this.position.x = x;
         this.position.y = y;
-
-        // Update visual position using transform
         const translateX = x * this.cellSize;
         const translateY = y * this.cellSize;
         this.element.style.transform = `translate(${translateX}px, ${translateY}px)`;
+    }
+
+    // Modify remove to just hide instead of removing from DOM
+    remove() {
+        this.hide();
     }
 
     move(direction) {
@@ -82,8 +93,5 @@ export class Player {
 
     resetToStart() {
         this.updatePosition(1, 1);
-    }
-    remove() {
-        this.element.remove();
     }
 }
