@@ -49,7 +49,7 @@ class GameController {
         [
             'startGame', 'updateTimer', 'handleKeyPress',
             'pauseGame', 'resumeGame', 'restartGame',
-            'movePlayer', 'updatePlayerPosition', 'enemyDefeated',
+            'movePlayer', 'enemyDefeated',
             'stopGame', 'updateUI'
         ].forEach(method => this[method] = this[method].bind(this));
     }
@@ -91,11 +91,6 @@ class GameController {
     winGame() {
         this.stopGame();
         this.ui.winScreen.classList.remove("hidden");
-    }
-
-    loseGame() {
-        this.stopGame();
-        this.ui.gameOverScreen.classList.remove("hidden");
     }
 
     pauseGame() {
@@ -165,12 +160,6 @@ class GameController {
                 reducePlayerLives();
                 this.player.resetToStart();
             }
-        }
-    }
-
-    updatePlayerPosition(newRow, newCol) {
-        if (this.player) {
-            this.player.updatePosition(newRow, newCol);
         }
     }
 

@@ -108,8 +108,6 @@ function cleanupExplosion() {
         cleanupTimeout = null;
     }
 }
-
-// Rest of the code remains the same...
 function checkCollisions(x, y) {
     if (gameController.player.position.x === x && gameController.player.position.y === y) {
         reducePlayerLives();
@@ -128,12 +126,6 @@ function handleEnemyDefeat(enemy) {
     gameController.enemies = gameController.enemies.filter(e => e !== enemy);
     scoreManager.addPoints(SCORE_CONFIG.ENEMY_DEFEATED);
     gameController.enemyDefeated();
-}
-
-export function cleanup() {
-    if (explosionTimeout) clearTimeout(explosionTimeout);
-    if (cleanupTimeout) clearTimeout(cleanupTimeout);
-    bombActive = false;
 }
 
 export function reducePlayerLives() {
