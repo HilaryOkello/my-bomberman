@@ -74,6 +74,8 @@ class GameController {
         // Start timer
         this.gameTimer = setInterval(this.updateTimer, 1000);
 
+        gameBoard.resetBoard();
+
         await playSound("introGame");
 
         // Activate player and enemies
