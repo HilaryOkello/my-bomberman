@@ -86,6 +86,48 @@ class GameBoard {
         });
     }
 
+    resetBoard() {
+        // Reset board state - this creates a new grid automatically
+        this.boardState = new BoardState(this.width, this.height);
+        this.boardState.initialize();
+
+        // Store cell elements in a map for quick lookup
+        const cellElements = new Map();
+
+        // Get all existing cells and store them in the map
+        this.gameElement.querySelectorAll('.cell').forEach(cell => {
+            const x = parseInt(cell.dataset.x);
+            const y = parseInt(cell.dataset.y);
+            cellElements.set(`${x},${y}`, cell);
+        });
+
+        // Update only the visual representation
+        for (let y = 0; y < this.height; y++) {
+            for (let x = 0; x < this.width; x++) {
+                const cellType = this.boardState.getCellType(x, y);
+                const key = `${x},${y}`;
+                const existingCell = cellElements.get(key);
+
+                // Update cell classes efficiently
+                const newClassName = `cell ${this.getCellClassName(cellType)}`;
+                if (existingCell.className !== newClassName) {
+                    existingCell.className = newClassName;
+                }
+            }
+        }
+
+        // Clear any active bombs or explosions
+        if (this.bombElement) {
+            this.bombElement.style.visibility = 'hidden';
+        }
+        if (this.explosionElements) {
+            this.explosionElements.forEach(elem => {
+                elem.style.display = 'none';
+                elem.classList.remove('active');
+            });
+        }
+    }
+
     activatePlayer() {
         this.player.show();
         this.player.updatePosition(1, 1);
