@@ -26,6 +26,10 @@ export function placeBomb() {
 
     bombActive = true;
 
+    // Clear any existing timeouts
+    if (explosionTimeout) clearTimeout(explosionTimeout);
+    if (cleanupTimeout) clearTimeout(cleanupTimeout);
+
     explosionTimeout = setTimeout(() => {
         explodeBomb(bombX, bombY);
     }, 1500);
@@ -41,15 +45,71 @@ function explodeBomb(x, y) {
     ];
 
     positions.forEach((pos, index) => {
-        gameBoard.explosionElements[index].style.transform = `translate(${pos.x * 30}px, ${pos.y * 30}px)`;
-        gameBoard.explosionElements[index].style.visibility = 'visible';
+        if (gameBoard.boardState.getCellType(pos.x, pos.y) === CELL_TYPES.WALL) {
+            return;
+        }
+        const element = gameBoard.explosionElements[index];
+        element.style.transform = `translate(${pos.x * 30}px, ${pos.y * 30}px)`;
+        element.style.display = 'block';
+        element.classList.add('active');
+
+        // Check if this position has a breakable wall
+        const cellType = gameBoard.boardState.getCellType(pos.x, pos.y);
+        if (cellType === CELL_TYPES.BREAKABLE) {
+            // Destroy the breakable wall
+            gameBoard.boardState.setCellType(pos.x, pos.y, CELL_TYPES.EMPTY);
+
+            // Update the visual representation
+            const cellElement = document.querySelector(`[data-x="${pos.x}"][data-y="${pos.y}"]`);
+            if (cellElement) {
+                cellElement.classList.remove('breakable');
+                cellElement.classList.add('empty');
+            }
+        }
+
         checkCollisions(pos.x, pos.y);
     });
 
-    cleanupTimeout = setTimeout(cleanupExplosion, 500);
+    // Reset bomb visibility immediately
+    gameBoard.bombElement.style.visibility = 'hidden';
+
+    // Set cleanup timeout
+    if (cleanupTimeout) clearTimeout(cleanupTimeout);
+    cleanupTimeout = setTimeout(() => {
+        cleanupExplosion();
+    }, 500);
+
     bombActive = false;
 }
 
+function cleanupExplosion() {
+    // Reset the cell type where the bomb was
+    const bombX = parseInt(gameBoard.bombElement.style.transform.split('(')[1]) / 30;
+    const bombY = parseInt(gameBoard.bombElement.style.transform.split(', ')[1]) / 30;
+    gameBoard.boardState.setCellType(bombX, bombY, CELL_TYPES.EMPTY);
+
+    // Hide all explosion elements
+    gameBoard.explosionElements.forEach(explosion => {
+        explosion.style.display = 'none';
+        explosion.classList.remove('active');
+    });
+
+    // Reset bomb element
+    gameBoard.bombElement.style.visibility = 'hidden';
+    bombActive = false;
+
+    // Clear timeouts
+    if (explosionTimeout) {
+        clearTimeout(explosionTimeout);
+        explosionTimeout = null;
+    }
+    if (cleanupTimeout) {
+        clearTimeout(cleanupTimeout);
+        cleanupTimeout = null;
+    }
+}
+
+// Rest of the code remains the same...
 function checkCollisions(x, y) {
     if (gameController.player.position.x === x && gameController.player.position.y === y) {
         reducePlayerLives();
@@ -68,19 +128,6 @@ function handleEnemyDefeat(enemy) {
     gameController.enemies = gameController.enemies.filter(e => e !== enemy);
     scoreManager.addPoints(SCORE_CONFIG.ENEMY_DEFEATED);
     gameController.enemyDefeated();
-}
-
-function cleanupExplosion() {
-    gameBoard.boardState.setCellType(
-        parseInt(gameBoard.bombElement.style.transform.split('(')[1]) / 30,
-        parseInt(gameBoard.bombElement.style.transform.split(', ')[1]) / 30,
-        CELL_TYPES.EMPTY
-    );
-
-    gameBoard.bombElement.style.visibility = 'hidden';
-    gameBoard.explosionElements.forEach(explosion => {
-        explosion.style.visibility = 'hidden';
-    });
 }
 
 export function cleanup() {
