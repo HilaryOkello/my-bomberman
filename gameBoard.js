@@ -73,7 +73,7 @@ class GameBoard {
         this.bombElement.style.position = 'absolute';
         this.bombElement.style.visibility = 'hidden';
         this.gameElement.appendChild(this.bombElement);
-    
+
         this.explosionElements = ['center', 'right', 'left', 'up', 'down'].map(type => {
             const explosion = document.createElement('div');
             explosion.className = `explosion explosion-${type}`; // Add type-specific class
@@ -84,17 +84,6 @@ class GameBoard {
             this.gameElement.appendChild(explosion);
             return explosion;
         });
-    }
-
-    getExplosionImage(type) {
-        const images = {
-            center: "url('./images/explosion_base.png')",
-            right: "url('./images/explosion_horizontal.png')",
-            left: "url('./images/explosion_horizontal.png')",
-            up: "url('./images/explosion_vertical.png')",
-            down: "url('./images/explosion_vertical.png')"
-        };
-        return images[type];
     }
 
     activatePlayer() {
@@ -152,25 +141,6 @@ class GameBoard {
 
     isWalkable(x, y) {
         return this.boardState.isWalkable(x, y);
-    }
-
-    updateCell(x, y, newType) {
-        const cellTypeValue = this.getCellTypeValue(newType);
-        this.boardState.setCellType(x, y, cellTypeValue);
-
-        const cellElement = document.querySelector(`[data-x="${x}"][data-y="${y}"]`);
-        if (cellElement) {
-            cellElement.className = `cell ${newType}`;
-        }
-    }
-
-    getCellTypeValue(typeName) {
-        switch (typeName) {
-            case 'wall': return CELL_TYPES.WALL;
-            case 'breakable': return CELL_TYPES.BREAKABLE;
-            case 'bomb': return CELL_TYPES.BOMB;
-            default: return CELL_TYPES.EMPTY;
-        }
     }
 }
 
