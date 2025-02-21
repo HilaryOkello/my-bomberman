@@ -1,123 +1,148 @@
-// Constants for board dimensions
+// gameBoard.js
+import { BoardState, CELL_TYPES } from './state.js';
+import { Player } from './player.js';
+import { Enemy } from './enemy.js';
+
 const BOARD_WIDTH = 17;
 const BOARD_HEIGHT = 13;
+const MAX_ENEMIES = 4;
 
-
-// 
 class GameBoard {
     constructor() {
         this.width = BOARD_WIDTH;
         this.height = BOARD_HEIGHT;
-        this.board = [];
+        this.boardState = new BoardState(BOARD_WIDTH, BOARD_HEIGHT);
         this.gameElement = document.getElementById('game-board');
+        this.player = null;
+        this.enemyPool = [];
     }
 
     initializeBoard() {
+        // Initialize the board state
+        this.boardState.initialize();
+
         // Create a document fragment to batch DOM operations
         const fragment = document.createDocumentFragment();
         this.gameElement.innerHTML = '';
-        this.board = [];
 
+        // Create visual representation
         for (let y = 0; y < this.height; y++) {
-            const row = [];
             for (let x = 0; x < this.width; x++) {
-                let cellType = this.determineInitialCellType(x, y);
-                let isWalkable = cellType === 'empty';
-                row.push({ type: cellType, walkable: isWalkable });
-
+                const cellType = this.boardState.getCellType(x, y);
                 const cell = document.createElement('div');
-                cell.className = `cell ${cellType}`;
+                cell.className = `cell ${this.getCellClassName(cellType)}`;
                 cell.dataset.x = x;
                 cell.dataset.y = y;
                 fragment.appendChild(cell);
             }
-            this.board.push(row);
         }
+
+        // Set relative positioning for absolute children
+        this.gameElement.style.position = 'relative';
+
+        // Initialize player
+        this.initializePlayer();
+
+        // Initialize enemy pool
+        this.initializeEnemyPool();
+
+        // Initialize bomb and explosion elements
+        this.initializeExplosionElements();
 
         // Single DOM update
         this.gameElement.appendChild(fragment);
     }
 
-    determineInitialCellType(x, y) {
-        // Border walls
-        if (x === 0 || x === this.width - 1 || y === 0 || y === this.height - 1) {
-            return 'wall';
-        }
-
-        // Fixed walls in a grid pattern (every 2 cells)
-        if (x % 2 === 0 && y % 2 === 0) {
-            return 'wall';
-        }
-
-        // Safe zones for players in corners
-        if (this.isPlayerSafeZone(x, y)) {
-            return 'empty';
-        }
-
-        // Random breakable walls (40% chance)
-        if (Math.random() < 0.4) {
-            return 'breakable';
-        }
-
-        return 'empty';
+    initializePlayer() {
+        this.player = new Player();
+        this.player.hide(); // Start hidden
+        this.gameElement.appendChild(this.player.element);
     }
 
-    isPlayerSafeZone(x, y) {
-        // Top-left corner (player 1)
-        if (x <= 2 && y <= 2) return true;
-
-        // Top-right corner (player 2)
-        if (x >= this.width - 3 && y <= 2) return true;
-
-        // Bottom-left corner (player 3)
-        if (x <= 2 && y >= this.height - 3) return true;
-
-        // Bottom-right corner (player 4)
-        if (x >= this.width - 3 && y >= this.height - 3) return true;
-
-        return false;
-    }
-
-    // createCell(x, y, type) {
-    //     const cell = document.createElement('div');
-    //     cell.className = `cell ${type}`;
-    //     cell.dataset.x = x;
-    //     cell.dataset.y = y;
-    //     this.gameElement.appendChild(cell);
-    // }
-
-    getCellAt(x, y) {
-        if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
-            return this.board[y][x];
-        }
-        return null;
-    }
-
-    updateCell(x, y, newType) {
-        if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
-            // this.board[y][x] = newType;
-            let isWalkable = newType == 'empty';
-            this.board[y][x] = { type: newType, walkable: isWalkable };
-
-            // const cellElement = this.gameElement.children[y * this.width + x];
-            // cellElement.className = `cell ${newType}`;
-            const cellElement = document.querySelector(`[data-x="${x}"][data-y="${y}"]`);
-            if (cellElement) {
-                cellElement.className = `cell ${newType}`;
-            }
+    initializeEnemyPool() {
+        for (let i = 0; i < MAX_ENEMIES; i++) {
+            const enemy = new Enemy();
+            enemy.hide(); // Start hidden
+            this.gameElement.appendChild(enemy.element);
+            this.enemyPool.push(enemy);
         }
     }
+    initializeExplosionElements() {
+        this.bombElement = document.createElement('div');
+        this.bombElement.className = 'bomb';
+        this.bombElement.style.position = 'absolute';
+        this.bombElement.style.visibility = 'hidden';
+        this.gameElement.appendChild(this.bombElement);
 
-    // Helper method to check if a cell is walkable
-    // isWalkable(x, y) {
-    //     const cellType = this.getCellAt(x, y);
-    //     return cellType === 'empty';
-    // }
+        this.explosionElements = ['center', 'right', 'left', 'up', 'down'].map(type => {
+            const explosion = document.createElement('div');
+            explosion.className = `explosion explosion-${type}`; // Add type-specific class
+            explosion.style.position = 'absolute';
+            explosion.style.width = '30px';
+            explosion.style.height = '30px';
+            explosion.style.display = 'none'; // Use display instead of visibility
+            this.gameElement.appendChild(explosion);
+            return explosion;
+        });
+    }
+
+    activatePlayer() {
+        this.player.show();
+        this.player.updatePosition(1, 1);
+        return this.player;
+    }
+
+    spawnEnemies(numEnemies) {
+        const activeEnemies = [];
+
+        for (let i = 0; i < numEnemies && i < MAX_ENEMIES; i++) {
+            let x, y;
+            do {
+                x = Math.floor(Math.random() * (this.width - 2)) + 1;
+                y = Math.floor(Math.random() * (this.height - 2)) + 1;
+            } while (
+                !this.isWalkable(x, y) ||
+                this.isNearPlayer(x, y) ||
+                this.isNearOtherEnemy(x, y, activeEnemies)
+            );
+
+            const enemy = this.enemyPool[i];
+            enemy.activate(x, y);
+            activeEnemies.push(enemy);
+        }
+
+        return activeEnemies;
+    }
+
+    deactivateAllEnemies() {
+        this.enemyPool.forEach(enemy => enemy.deactivate());
+    }
+
+    isNearPlayer(x, y) {
+        return x <= 2 && y <= 2;
+    }
+
+    isNearOtherEnemy(x, y, activeEnemies) {
+        return activeEnemies.some(enemy =>
+            Math.abs(enemy.position.x - x) < 2 &&
+            Math.abs(enemy.position.y - y) < 2
+        );
+    }
+
+    // Existing methods...
+    getCellClassName(cellType) {
+        switch (cellType) {
+            case CELL_TYPES.WALL: return 'wall';
+            case CELL_TYPES.BREAKABLE: return 'breakable';
+            case CELL_TYPES.BOMB: return 'bomb';
+            default: return 'empty';
+        }
+    }
+
     isWalkable(x, y) {
-        return this.board[y] && this.board[y][x] && this.board[y][x].walkable;
+        return this.boardState.isWalkable(x, y);
     }
 }
 
-// Create and export game board instance
 const gameBoard = new GameBoard();
 export default gameBoard;
