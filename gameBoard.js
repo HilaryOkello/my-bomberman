@@ -73,13 +73,14 @@ class GameBoard {
         this.bombElement.style.position = 'absolute';
         this.bombElement.style.visibility = 'hidden';
         this.gameElement.appendChild(this.bombElement);
-
+    
         this.explosionElements = ['center', 'right', 'left', 'up', 'down'].map(type => {
             const explosion = document.createElement('div');
-            explosion.className = 'explosion';
+            explosion.className = `explosion explosion-${type}`; // Add type-specific class
             explosion.style.position = 'absolute';
-            explosion.style.visibility = 'hidden';
-            explosion.style.backgroundImage = this.getExplosionImage(type);
+            explosion.style.width = '30px';
+            explosion.style.height = '30px';
+            explosion.style.display = 'none'; // Use display instead of visibility
             this.gameElement.appendChild(explosion);
             return explosion;
         });
