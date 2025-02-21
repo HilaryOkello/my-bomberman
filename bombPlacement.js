@@ -2,6 +2,7 @@ import { scoreManager, SCORE_CONFIG } from './scores.js';
 import gameController from './activatePlayer.js';
 import gameBoard from './gameBoard.js';
 import { CELL_TYPES } from './state.js';
+import { playSound } from './soundManager.js';
 
 let bombActive = false;
 let explosionTimeout = null;
@@ -32,10 +33,11 @@ export function placeBomb() {
 
     explosionTimeout = setTimeout(() => {
         explodeBomb(bombX, bombY);
-    }, 1500);
+    }, 1000);
 }
 
 function explodeBomb(x, y) {
+    playSound("bombExplodes")
     const positions = [
         { x, y, type: 'center' },
         { x: x + 1, y, type: 'right' },
@@ -122,10 +124,12 @@ function checkCollisions(x, y) {
 }
 
 function handleEnemyDefeat(enemy) {
-    enemy.deactivate();
-    gameController.enemies = gameController.enemies.filter(e => e !== enemy);
-    scoreManager.addPoints(SCORE_CONFIG.ENEMY_DEFEATED);
-    gameController.enemyDefeated();
+    setTimeout(() => {
+        enemy.deactivate();
+        gameController.enemies = gameController.enemies.filter(e => e !== enemy);
+        scoreManager.addPoints(SCORE_CONFIG.ENEMY_DEFEATED);
+        gameController.enemyDefeated();
+    }, 100);
 }
 
 export function reducePlayerLives() {
@@ -142,9 +146,10 @@ export function reducePlayerLives() {
     }
 }
 
-function gameOver() {
+async function gameOver() {
     gameController.stopGame();
     if (window.collisionCheckInterval) clearInterval(window.collisionCheckInterval);
     if (window.enemyMoveInterval) clearInterval(window.enemyMoveInterval);
+    await playSound("gameOver")
     document.getElementById('game-over-screen').classList.remove('hidden');
 }

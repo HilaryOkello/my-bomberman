@@ -1,9 +1,7 @@
 import gameBoard from "./gameBoard.js";
 import { placeBomb, reducePlayerLives } from "./bombPlacement.js";
-import { spawnEnemies } from "./enemyPlacement.js";
 import { scoreManager } from "./scores.js";
-import { Player } from './player.js';
-
+import { playSound, playBackgroundMusic, stopBackgroundMusic } from "./soundManager.js";
 class GameController {
     constructor() {
         this.defaultState = {
@@ -65,7 +63,8 @@ class GameController {
         document.addEventListener("keydown", this.handleKeyPress);
     }
 
-    startGame() {
+    async startGame() {
+        
         Object.assign(this, { ...this.defaultState, isPlaying: true });
         scoreManager.reset();
         this.ui.winScreen.classList.add("hidden");
@@ -75,11 +74,14 @@ class GameController {
         // Start timer
         this.gameTimer = setInterval(this.updateTimer, 1000);
 
+        await playSound("introGame");
+
         // Activate player and enemies
         this.player = gameBoard.activatePlayer();
         this.enemies = gameBoard.spawnEnemies(this.enemyCount);
 
         this.updateUI();
+        playBackgroundMusic();
     }
 
     enemyDefeated() {
@@ -88,9 +90,11 @@ class GameController {
         }
     }
 
-    winGame() {
+    async winGame() {
         this.stopGame();
+        await playSound("gameWin");
         this.ui.winScreen.classList.remove("hidden");
+        stopBackgroundMusic();
     }
 
     pauseGame() {
@@ -98,6 +102,7 @@ class GameController {
         this.isPaused = true;
         clearInterval(this.gameTimer);
         this.ui.pauseScreen.classList.remove("hidden");
+        stopBackgroundMusic();
     }
 
     resumeGame() {
@@ -105,6 +110,7 @@ class GameController {
         this.isPaused = false;
         this.ui.pauseScreen.classList.add("hidden");
         this.gameTimer = setInterval(this.updateTimer, 1000);
+        playBackgroundMusic();
     }
 
     restartGame() {
@@ -123,6 +129,7 @@ class GameController {
         this.player.hide();
         gameBoard.deactivateAllEnemies();
         this.enemies = [];
+        stopBackgroundMusic();
     }
 
     updateTimer() {
