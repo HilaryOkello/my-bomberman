@@ -49,7 +49,7 @@ class GameController {
         [
             'startGame', 'updateTimer', 'handleKeyPress',
             'pauseGame', 'resumeGame', 'restartGame',
-            'movePlayer', 'updatePlayerPosition', 'enemyDefeated',
+            'movePlayer', 'enemyDefeated',
             'stopGame', 'updateUI'
         ].forEach(method => this[method] = this[method].bind(this));
     }
@@ -66,7 +66,7 @@ class GameController {
     }
 
     startGame() {
-        Object.assign(this, { ...this.defaultState, isPlaying: true, player: new Player() });
+        Object.assign(this, { ...this.defaultState, isPlaying: true });
         scoreManager.reset();
         this.ui.winScreen.classList.add("hidden");
         this.ui.startScreen.classList.add("hidden");
@@ -75,9 +75,9 @@ class GameController {
         // Start timer
         this.gameTimer = setInterval(this.updateTimer, 1000);
 
-        // Place player & spawn enemies
-        this.updatePlayerPosition(1, 1);
-        this.enemies = spawnEnemies(this.enemyCount);
+        // Activate player and enemies
+        this.player = gameBoard.activatePlayer();
+        this.enemies = gameBoard.spawnEnemies(this.enemyCount);
 
         this.updateUI();
     }
@@ -91,11 +91,6 @@ class GameController {
     winGame() {
         this.stopGame();
         this.ui.winScreen.classList.remove("hidden");
-    }
-
-    loseGame() {
-        this.stopGame();
-        this.ui.gameOverScreen.classList.remove("hidden");
     }
 
     pauseGame() {
@@ -124,10 +119,9 @@ class GameController {
         this.isPaused = false;
         clearInterval(this.gameTimer);
 
-        if (this.player) {
-            this.player.remove();
-        }
-        this.enemies.forEach(enemy => enemy.remove());
+        // Hide player and enemies
+        this.player.hide();
+        gameBoard.deactivateAllEnemies();
         this.enemies = [];
     }
 
@@ -166,12 +160,6 @@ class GameController {
                 reducePlayerLives();
                 this.player.resetToStart();
             }
-        }
-    }
-
-    updatePlayerPosition(newRow, newCol) {
-        if (this.player) {
-            this.player.updatePosition(newRow, newCol);
         }
     }
 
