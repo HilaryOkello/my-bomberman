@@ -1,4 +1,4 @@
-// player.js
+import gameBoard from "./gameBoard.js";
 export class Player {
     constructor() {
         this.position = { x: 1, y: 1 };
@@ -73,16 +73,7 @@ export class Player {
     }
 
     isValidMove(newPos) {
-        // Get the cell at the new position
-        const targetCell = document.querySelector(
-            `[data-x="${newPos.x}"][data-y="${newPos.y}"]`
-        );
-
-        if (!targetCell) return false;
-
-        // Check if the cell is walkable
-        return !targetCell.classList.contains('wall') &&
-            !targetCell.classList.contains('breakable');
+        return gameBoard.boardState.isWalkable(newPos.x, newPos.y);
     }
 
     getCurrentCell() {
