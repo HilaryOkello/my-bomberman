@@ -37,7 +37,8 @@ export function placeBomb() {
 }
 
 function explodeBomb(x, y) {
-    playSound("bombExplodes")
+    playSound("bombExplodes");
+
     const positions = [
         { x, y, type: 'center' },
         { x: x + 1, y, type: 'right' },
@@ -46,43 +47,44 @@ function explodeBomb(x, y) {
         { x, y: y - 1, type: 'up' }
     ];
 
+    let affectedEnemies = new Set(); // Track defeated enemies
+
     positions.forEach((pos, index) => {
-        if (gameBoard.boardState.getCellType(pos.x, pos.y) === CELL_TYPES.WALL) {
-            return;
-        }
+        if (gameBoard.boardState.getCellType(pos.x, pos.y) === CELL_TYPES.WALL) return;
+
         const element = gameBoard.explosionElements[index];
         element.style.transform = `translate(${pos.x * 30}px, ${pos.y * 30}px)`;
         element.style.display = 'block';
         element.classList.add('active');
 
-        // Check if this position has a breakable wall
+        // Destroy breakable walls
         const cellType = gameBoard.boardState.getCellType(pos.x, pos.y);
         if (cellType === CELL_TYPES.BREAKABLE) {
-            // Destroy the breakable wall
             gameBoard.boardState.setCellType(pos.x, pos.y, CELL_TYPES.EMPTY);
-
-            // Update the visual representation
             const cellElement = document.querySelector(`[data-x="${pos.x}"][data-y="${pos.y}"]`);
             if (cellElement) {
                 cellElement.classList.remove('breakable');
                 cellElement.classList.add('empty');
             }
         }
-
-        checkCollisions(pos.x, pos.y);
     });
 
-    // Reset bomb visibility immediately
-    gameBoard.bombElement.style.visibility = 'hidden';
+    // **New: Continuously check collisions for the duration of the explosion**
+    let explosionDuration = 500; // Adjust if needed
+    let interval = setInterval(() => {
+        checkCollisions(x, y, affectedEnemies);
+        positions.forEach(pos => checkCollisions(pos.x, pos.y, affectedEnemies));
+    }, 50); // Check every 50ms
 
-    // Set cleanup timeout
-    if (cleanupTimeout) clearTimeout(cleanupTimeout);
-    cleanupTimeout = setTimeout(() => {
+    setTimeout(() => {
+        clearInterval(interval);
         cleanupExplosion();
-    }, 500);
+    }, explosionDuration);
 
+    gameBoard.bombElement.style.visibility = 'hidden';
     bombActive = false;
 }
+
 
 function cleanupExplosion() {
     // Reset the cell type where the bomb was
@@ -110,14 +112,17 @@ function cleanupExplosion() {
         cleanupTimeout = null;
     }
 }
-function checkCollisions(x, y) {
+function checkCollisions(x, y, affectedEnemies) {
+    // Check if player is in explosion area
     if (gameController.player.position.x === x && gameController.player.position.y === y) {
         reducePlayerLives();
         gameController.player.resetToStart();
     }
 
+    // Check if an enemy is in explosion area
     gameController.enemies.forEach(enemy => {
-        if (enemy.position.x === x && enemy.position.y === y) {
+        if (enemy.position.x === x && enemy.position.y === y && !affectedEnemies.has(enemy)) {
+            affectedEnemies.add(enemy); // Mark enemy as defeated
             handleEnemyDefeat(enemy);
         }
     });
