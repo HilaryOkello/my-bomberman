@@ -6,10 +6,9 @@ import { LEVEL_CONFIG } from "./levelSystem.js";
 
 class GameController {
     constructor() {
-        this.defaultState = {
+        this.state = {
             isPlaying: false,
             isPaused: false,
-            score: 0,
             lives: 3,
             level: 1,
             time: 0,
@@ -19,7 +18,7 @@ class GameController {
             player: null,
             gameTimer: null
         };
-        Object.assign(this, this.defaultState);
+        Object.assign(this, this.state);
 
         // UI Elements
         this.ui = {
@@ -33,7 +32,10 @@ class GameController {
             winScreen: document.getElementById("game-win-screen"),
             playAgain: document.getElementById("play-again-btn"),
             gameOverRestart: document.getElementById("game-over-btn"),
-            scoreDisplay: document.getElementById("score"),
+            levelDisplay: document.getElementById("level"),
+            completeLevelDisplay: document.getElementById("complete-level-screen"),
+            completeLevel: document.getElementById("complete-level"),
+            levelScore: document.getElementById("level-score"),
             timeDisplay: document.getElementById("time"),
             livesDisplay: document.getElementById("lives"),
             levelDisplay: document.getElementById("level"),
@@ -66,10 +68,28 @@ class GameController {
         document.addEventListener("keydown", this.handleKeyPress);
     }
 
-    async startLevel() {
-        // Reset board for the new level
-        gameBoard.resetBoard();
+    async startGame() {
 
+        // Clear any existing timer first
+        if (this.gameTimer) {
+            clearInterval(this.gameTimer);
+        }
+
+        // Reset game state to default
+        Object.assign(this, { ...this.state, isPlaying: true });
+        scoreManager.reset();
+
+        // Hide/show appropriate screens
+        this.ui.winScreen.classList.add("hidden");
+        this.ui.startScreen.classList.add("hidden");
+        this.ui.pauseBtn.style.display = "block";
+
+        // Start the first level
+        await this.startLevel();
+
+    }
+
+    async startLevel() {
         // Set up level-specific configurations
         this.enemyCount = LEVEL_CONFIG[this.level].enemyCount;
         this.timeLimit = LEVEL_CONFIG[this.level].timeLimit;
@@ -96,73 +116,47 @@ class GameController {
         playBackgroundMusic();
     }
 
-    async startGame() {
+    async completeLevel() {
+        scoreManager.addPoints(SCORE_CONFIG.LEVEL_COMPLETION_BONUS);
+        const remainingTime = this.timeLimit - this.time;
+        scoreManager.addTimeBonus(remainingTime);
+        this.isPaused = true;
+        this.player.hide();
+        gameBoard.deactivateAllEnemies();
+        this.enemies = [];
+        stopBackgroundMusic();
+        await playSound("introGame");
+        this.ui.levelScore.textContent = `${scoreManager.currentScore}`;
+        this.ui.completeLevel.textContent = `Level ${this.level}`;
+        this.ui.completeLevelDisplay.classList.remove("hidden");
 
-        // Clear any existing timer first
-        if (this.gameTimer) {
-            clearInterval(this.gameTimer);
-        }
-        
-        // Reset game state to default
-        Object.assign(this, { ...this.defaultState, isPlaying: true });
-        scoreManager.reset();
+        // Delay before moving to the next level
+        setTimeout(() => {
+            this.nextLevel();
+        }, 3000);
 
-        // Hide/show appropriate screens
-        this.ui.winScreen.classList.add("hidden");
-        this.ui.startScreen.classList.add("hidden");
-        this.ui.pauseBtn.style.display = "block";
+    }
 
-        // Start the first level
-        await this.startLevel();
-
+    nextLevel() {
+        this.ui.completeLevelDisplay.classList.add("hidden");
+        // Clear current timer
+        clearInterval(this.gameTimer);
+        // Increment level
+        this.level++;
+        gameBoard.resetBoard();
+        this.isPaused = false;
+        this.startLevel();
     }
 
     async enemyDefeated() {
-        // Add level Complete bonus
-        scoreManager.addPoints(SCORE_CONFIG.LEVEL_COMPLETION_BONUS);
-
         if (--this.enemyCount <= 0) {
             if (this.level < 3) {
-                await this.nextLevel();
+                this.completeLevel();
             } else {
+                scoreManager.addPoints(SCORE_CONFIG.LEVEL_COMPLETION_BONUS);
                 this.winGame();
             }
         }
-    }
-
-    async nextLevel() {
-        // Add level completion bonus
-        scoreManager.addPoints(SCORE_CONFIG.LEVEL_COMPLETION_BONUS);
-        
-        // Add time bonus
-        const remainingTime = this.timeLimit - this.time;
-        scoreManager.addTimeBonus(remainingTime);
-        
-        // Increment level
-        this.level++;
-        
-        // Clear current timer
-        clearInterval(this.gameTimer);
-        
-        // Show level transition
-        const levelMessage = document.createElement('div');
-        levelMessage.className = 'level-message';
-        levelMessage.textContent = `Level ${this.level}`;
-        document.body.appendChild(levelMessage);
-        
-        // Wait for transition
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        levelMessage.remove();
-        
-        // Start new level
-        await this.startLevel();
-    }
-
-    async winGame() {
-        this.stopGame();
-        await playSound("gameWin");
-        this.ui.winScreen.classList.remove("hidden");
-        stopBackgroundMusic();
     }
 
     pauseGame() {
@@ -197,6 +191,13 @@ class GameController {
         this.player.hide();
         gameBoard.deactivateAllEnemies();
         this.enemies = [];
+        stopBackgroundMusic();
+    }
+
+    async winGame() {
+        this.stopGame();
+        await playSound("gameWin");
+        this.ui.winScreen.classList.remove("hidden");
         stopBackgroundMusic();
     }
 
@@ -245,9 +246,7 @@ class GameController {
     }
 
     updateUI() {
-        this.ui.scoreDisplay.textContent = this.score;
         this.ui.livesDisplay.textContent = `Lives: ${this.lives}`;
-        this.ui.levelDisplay.textContent = `Level: ${this.level}`;
         this.ui.levelDisplay.textContent = `Level: ${this.level}`;
 
         const timeRemaining = this.timeLimit - this.time;
