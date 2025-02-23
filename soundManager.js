@@ -4,11 +4,11 @@ const sounds = {
     introGame: new Audio("sounds/intro.mp3"),
     gameWin: new Audio("sounds/win.wav"),
     background: new Audio("sounds/background.mp3")
-  };
+};
 
-  sounds.background.loop = true;
+sounds.background.loop = true;
 
-  export function playBackgroundMusic() {
+export function playBackgroundMusic() {
     sounds.background.currentTime = 0;
     sounds.background.play();
 }
@@ -17,17 +17,17 @@ export function stopBackgroundMusic() {
     sounds.background.pause();
     sounds.background.currentTime = 0;
 }
-  
-  export function playSound(sound) {
+
+export function playSound(sound) {
     return new Promise((resolve) => {
         if (sounds[sound]) {
             sounds[sound].currentTime = 0;
             sounds[sound].play();
-            sounds[sound].onended = resolve; // Resolve the promise when the sound ends
+            sounds[sound].onended = resolve;
         } else {
-            resolve(); // Resolve immediately if the sound is not found
+            resolve();
         }
     });
 }
-  
-  export default sounds;
+
+export default sounds;
