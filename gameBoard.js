@@ -5,7 +5,7 @@ import { Enemy } from './enemy.js';
 
 const BOARD_WIDTH = 17;
 const BOARD_HEIGHT = 13;
-const MAX_ENEMIES = 4;
+const MAX_ENEMIES = 5;
 
 class GameBoard {
     constructor() {
@@ -129,8 +129,8 @@ class GameBoard {
     }
 
     activatePlayer() {
-        this.player.show();
         this.player.updatePosition(1, 1);
+        this.player.show();
         return this.player;
     }
 
