@@ -1,5 +1,5 @@
 import gameBoard from "./gameBoard.js";
-import { placeBomb, reducePlayerLives } from "./bombPlacement.js";
+import { placeBomb, gameOver} from "./bombPlacement.js";
 import { SCORE_CONFIG, scoreManager } from "./scores.js";
 import { playSound, playBackgroundMusic, stopBackgroundMusic } from "./soundManager.js";
 import { LEVEL_CONFIG } from "./levelSystem.js";
@@ -11,7 +11,7 @@ class GameController {
             isPaused: false,
             lives: 3,
             level: 1,
-            time: 0,
+            time: this.timeLimit,
             enemyCount: LEVEL_CONFIG.enemyCount,
             timeLimit: LEVEL_CONFIG[1].timeLimit,
             enemies: [],
@@ -92,7 +92,7 @@ class GameController {
         // Set up level-specific configurations
         this.enemyCount = LEVEL_CONFIG[this.level].enemyCount;
         this.timeLimit = LEVEL_CONFIG[this.level].timeLimit;
-        this.time = 0;
+        this.time = this.timeLimit;
 
         // Start/restart timer
         if (this.gameTimer) {
@@ -117,8 +117,8 @@ class GameController {
 
     async completeLevel() {
         scoreManager.addPoints(SCORE_CONFIG.LEVEL_COMPLETION_BONUS);
-        const remainingTime = this.timeLimit - this.time;
-        scoreManager.addTimeBonus(remainingTime);
+        const timeTaken = this.timeLimit - this.time;
+        scoreManager.addTimeBonus(timeTaken);
         this.isPaused = true;
         this.player.hide();
         gameBoard.deactivateAllEnemies();
@@ -202,12 +202,13 @@ class GameController {
 
     updateTimer() {
 
-        if (this.time >= this.timeLimit) {
-            this.gameOver();
+        if (this.time <= 0) {
+            gameOver();
+            clearInterval(this.gameTimer);
             return;
         }
 
-        this.time++;
+        this.time--;
         const minutes = String(Math.floor(this.time / 60)).padStart(2, "0");
         const seconds = String(this.time % 60).padStart(2, "0");
         this.ui.timeDisplay.textContent = `Time: ${minutes}:${seconds}`;
@@ -237,9 +238,8 @@ class GameController {
         this.ui.livesDisplay.textContent = `Lives: ${this.lives}`;
         this.ui.levelDisplay.textContent = `Level: ${this.level}`;
 
-        const timeRemaining = this.timeLimit - this.time;
-        const minutes = String(Math.floor(timeRemaining / 60)).padStart(2, "0");
-        const seconds = String(timeRemaining % 60).padStart(2, "0");
+        const minutes = String(Math.floor(this.time / 60)).padStart(2, "0");
+        const seconds = String(this.time % 60).padStart(2, "0");
         this.ui.timeDisplay.textContent = `Time: ${minutes}:${seconds}`;
     }
 }
