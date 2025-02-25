@@ -37,8 +37,7 @@ export function placeBomb() {
 }
 
 function explodeBomb(x, y) {
-    playSound("bombExplodes");
-
+    playSound("bombExplodes")
     const positions = [
         { x, y, type: 'center' },
         { x: x + 1, y, type: 'right' },
@@ -47,44 +46,43 @@ function explodeBomb(x, y) {
         { x, y: y - 1, type: 'up' }
     ];
 
-    let affectedEnemies = new Set(); // Track defeated enemies
-
     positions.forEach((pos, index) => {
-        if (gameBoard.boardState.getCellType(pos.x, pos.y) === CELL_TYPES.WALL) return;
-
+        if (gameBoard.boardState.getCellType(pos.x, pos.y) === CELL_TYPES.WALL) {
+            return;
+        }
         const element = gameBoard.explosionElements[index];
         element.style.transform = `translate(${pos.x * 30}px, ${pos.y * 30}px)`;
         element.style.display = 'block';
         element.classList.add('active');
 
-        // Destroy breakable walls
+        // Check if this position has a breakable wall
         const cellType = gameBoard.boardState.getCellType(pos.x, pos.y);
         if (cellType === CELL_TYPES.BREAKABLE) {
+            // Destroy the breakable wall
             gameBoard.boardState.setCellType(pos.x, pos.y, CELL_TYPES.EMPTY);
+
+            // Update the visual representation
             const cellElement = document.querySelector(`[data-x="${pos.x}"][data-y="${pos.y}"]`);
             if (cellElement) {
                 cellElement.classList.remove('breakable');
                 cellElement.classList.add('empty');
             }
         }
+
+        checkCollisions(pos.x, pos.y);
     });
 
-    // **New: Continuously check collisions for the duration of the explosion**
-    let explosionDuration = 500; // Adjust if needed
-    let interval = setInterval(() => {
-        checkCollisions(x, y, affectedEnemies);
-        positions.forEach(pos => checkCollisions(pos.x, pos.y, affectedEnemies));
-    }, 50); // Check every 50ms
-
-    setTimeout(() => {
-        clearInterval(interval);
-        cleanupExplosion();
-    }, explosionDuration);
-
+    // Reset bomb visibility immediately
     gameBoard.bombElement.style.visibility = 'hidden';
+
+    // Set cleanup timeout
+    if (cleanupTimeout) clearTimeout(cleanupTimeout);
+    cleanupTimeout = setTimeout(() => {
+        cleanupExplosion();
+    }, 500);
+
     bombActive = false;
 }
-
 
 function cleanupExplosion() {
     // Reset the cell type where the bomb was
@@ -112,29 +110,29 @@ function cleanupExplosion() {
         cleanupTimeout = null;
     }
 }
-function checkCollisions(x, y, affectedEnemies) {
-    // Check if player is in explosion area
+function checkCollisions(x, y) {
     if (gameController.player.position.x === x && gameController.player.position.y === y) {
         reducePlayerLives();
         gameController.player.resetToStart();
     }
 
-    // Check if an enemy is in explosion area
     gameController.enemies.forEach(enemy => {
-        if (enemy.position.x === x && enemy.position.y === y && !affectedEnemies.has(enemy)) {
-            affectedEnemies.add(enemy); // Mark enemy as defeated
+        if (enemy.position.x === x && enemy.position.y === y) {
             handleEnemyDefeat(enemy);
         }
     });
 }
 
 function handleEnemyDefeat(enemy) {
+    enemy.element.classList.add('fade-out'); // Apply fade-out effect
+
     setTimeout(() => {
         enemy.deactivate();
+        enemy.element.classList.remove('fade-out'); // Remove fade-out class
         gameController.enemies = gameController.enemies.filter(e => e !== enemy);
         scoreManager.addPoints(SCORE_CONFIG.ENEMY_DEFEATED);
         gameController.enemyDefeated();
-    }, 100);
+    }, 1000); // Matches fade-out duration
 }
 
 export function reducePlayerLives() {
