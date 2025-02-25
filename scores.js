@@ -28,8 +28,8 @@ export class ScoreManager {
     }
   
     // Calculate and add time bonus
-    addTimeBonus(remainingTime) {
-      const timeBonus = Math.floor(remainingTime * SCORE_CONFIG.TIME_BONUS_FACTOR);
+    addTimeBonus(timeTaken) {
+      const timeBonus = Math.floor((3000/timeTaken) * SCORE_CONFIG.TIME_BONUS_FACTOR);
       this.addPoints(timeBonus);
       return timeBonus;
     }
