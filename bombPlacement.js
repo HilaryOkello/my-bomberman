@@ -149,7 +149,7 @@ export function reducePlayerLives() {
     }
 }
 
-async function gameOver() {
+export async function gameOver() {
     gameController.stopGame();
     if (window.collisionCheckInterval) clearInterval(window.collisionCheckInterval);
     if (window.enemyMoveInterval) clearInterval(window.enemyMoveInterval);
