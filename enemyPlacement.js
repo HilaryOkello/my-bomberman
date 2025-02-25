@@ -160,7 +160,6 @@ function getBestMoveTowardsPlayer(validMoves, playerPos) {
 
 export function checkAllEnemiesCollision(enemies) {
     if (!enemies || enemies.length === 0) return;
-
     enemies.forEach(enemy => {
         if (enemy.position.x === gameController.player.position.x &&
             enemy.position.y === gameController.player.position.y) {
