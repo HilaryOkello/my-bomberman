@@ -232,17 +232,6 @@ class GameController {
         }
     }
 
-    // movePlayer(direction) {
-    //     if (!this.isPlaying || this.isPaused) return;
-
-    //     if (this.player.move(direction)) {
-    //         const currentCell = this.player.getCurrentCell();
-    //         if (currentCell.querySelector('.enemy')) {
-    //             reducePlayerLives();
-    //             this.player.resetToStart();
-    //         }
-    //     }
-    // }
 
     updateUI() {
         this.ui.livesDisplay.textContent = `Lives: ${this.lives}`;
