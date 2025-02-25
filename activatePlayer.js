@@ -51,8 +51,7 @@ class GameController {
     bindMethods() {
         [
             'startGame', 'updateTimer', 'handleKeyPress',
-            'pauseGame', 'resumeGame', 'restartGame',
-            'movePlayer', 'enemyDefeated',
+            'pauseGame', 'resumeGame', 'restartGame', 'enemyDefeated',
             'stopGame', 'updateUI'
         ].forEach(method => this[method] = this[method].bind(this));
     }
@@ -227,23 +226,23 @@ class GameController {
         switch (event.key) {
             // case 'p': return this.isPaused ? this.resumeGame() : this.pauseGame();
             case 'ArrowUp': case 'ArrowDown': case 'ArrowLeft': case 'ArrowRight':
-                return this.movePlayer(event.key);
+                return this.player.move(event.key);
             case ' ':
                 return placeBomb();
         }
     }
 
-    movePlayer(direction) {
-        if (!this.isPlaying || this.isPaused) return;
+    // movePlayer(direction) {
+    //     if (!this.isPlaying || this.isPaused) return;
 
-        if (this.player.move(direction)) {
-            const currentCell = this.player.getCurrentCell();
-            if (currentCell.querySelector('.enemy')) {
-                reducePlayerLives();
-                this.player.resetToStart();
-            }
-        }
-    }
+    //     if (this.player.move(direction)) {
+    //         const currentCell = this.player.getCurrentCell();
+    //         if (currentCell.querySelector('.enemy')) {
+    //             reducePlayerLives();
+    //             this.player.resetToStart();
+    //         }
+    //     }
+    // }
 
     updateUI() {
         this.ui.livesDisplay.textContent = `Lives: ${this.lives}`;
