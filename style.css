@@ -165,7 +165,36 @@ body::after {
   height: 0;
   overflow: hidden;
   z-index: -1;
-  content: url("./images/wall.png") url("./images/breakable.png") url("./images/floor.png") url("./images/player.png") url("./images/bomb.png") url("./images/enemy.png") url("./images/explosion_base.png") url("./images/explosion_horizontal.png") url("./images/explosion_vertical.png");
+  content: url("./images/wall.png") url("./images/breakable.png") url("./images/floor.png") url("./images/bomb.png") url("./images/enemy.png") url("./images/explosion_base.png") url("./images/explosion_horizontal.png") url("./images/explosion_vertical.png");
+}
+
+.game-instructions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-align: center;
+  margin: 15px 0;
+  font-size: 1.1em;
+  color: var(--text-color);
+}
+
+.game-instructions i {
+  color: var(--accent-color);
+}
+
+.game-instructions i.fa-arrow-left,
+.game-instructions i.fa-arrow-right,
+.game-instructions i.fa-arrow-up,
+.game-instructions i.fa-arrow-down {
+  color: #ffcc00;
+  /* Using the same yellow as your game name */
+  margin: 0 2px;
+}
+
+.game-instructions i.fa-keyboard {
+  margin: 0 5px;
+  color: #4a90e2;
 }
 
 /* Player element styling */
@@ -173,28 +202,36 @@ body::after {
   width: var(--cell-size);
   height: var(--cell-size);
   position: absolute;
-  background-image: url('./images/player.png');
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
   pointer-events: auto;
-  transition: transform 0.1s ease;
+  transition: transform 0.1s linear;
   z-index: 10;
   will-change: transform;
 }
 
 .enemy {
-  width: var(--cell-size);
-  height: var(--cell-size);
+  width: 25px;
+  height: 25px;
   position: absolute;
   background-image: url('./images/enemy.png');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
   pointer-events: auto;
-  transition: none;
   z-index: 2;
   will-change: transform;
+}
+
+@keyframes fadeOut {
+  from {
+      opacity: 1;
+  }
+  to {
+      opacity: 0;
+  }
+}
+
+.enemy.fade-out {
+  animation: fadeOut 1s ease-out forwards;
 }
 
 /* Buttons */

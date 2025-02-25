@@ -124,12 +124,15 @@ function checkCollisions(x, y) {
 }
 
 function handleEnemyDefeat(enemy) {
+    enemy.element.classList.add('fade-out'); // Apply fade-out effect
+
     setTimeout(() => {
         enemy.deactivate();
+        enemy.element.classList.remove('fade-out'); // Remove fade-out class
         gameController.enemies = gameController.enemies.filter(e => e !== enemy);
         scoreManager.addPoints(SCORE_CONFIG.ENEMY_DEFEATED);
         gameController.enemyDefeated();
-    }, 100);
+    }, 1000); // Matches fade-out duration
 }
 
 export function reducePlayerLives() {
