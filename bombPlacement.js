@@ -79,7 +79,7 @@ function explodeBomb(x, y) {
     if (cleanupTimeout) clearTimeout(cleanupTimeout);
     cleanupTimeout = setTimeout(() => {
         cleanupExplosion();
-    }, 500);
+    }, 250);
 
     bombActive = false;
 }
@@ -132,7 +132,7 @@ function handleEnemyDefeat(enemy) {
         gameController.enemies = gameController.enemies.filter(e => e !== enemy);
         scoreManager.addPoints(SCORE_CONFIG.ENEMY_DEFEATED);
         gameController.enemyDefeated();
-    }, 1000); // Matches fade-out duration
+    }, 500);
 }
 
 export function reducePlayerLives() {

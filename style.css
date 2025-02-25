@@ -230,7 +230,7 @@ body::after {
 }
 
 .enemy.fade-out {
-  animation: fadeOut 1s ease-out forwards;
+  animation: fadeOut 0.5s ease-out forwards;
 }
 
 /* Buttons */
