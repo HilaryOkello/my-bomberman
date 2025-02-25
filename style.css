@@ -188,7 +188,6 @@ body::after {
 .game-instructions i.fa-arrow-up,
 .game-instructions i.fa-arrow-down {
   color: #ffcc00;
-  /* Using the same yellow as your game name */
   margin: 0 2px;
 }
 
