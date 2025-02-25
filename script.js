@@ -1,6 +1,7 @@
 import gameBoard from "./gameBoard.js";
 import gameController from "./activatePlayer.js";
 import { checkAllEnemiesCollision, updateEnemy } from "./enemyPlacement.js";
+import { playBackgroundMusic } from "./soundManager.js";
 
 let lastRenderTime = 0;
 const FRAME_TIME = 1000 / 60; // Target 60 FPS

@@ -68,11 +68,12 @@ class GameController {
     }
 
     async startGame() {
-
         // Clear any existing timer first
         if (this.gameTimer) {
             clearInterval(this.gameTimer);
         }
+
+        await playSound("introGame");
 
         // Reset game state to default
         Object.assign(this, { ...this.state, isPlaying: true });
@@ -84,11 +85,11 @@ class GameController {
         this.ui.pauseBtn.style.display = "block";
 
         // Start the first level
-        await this.startLevel();
+        this.startLevel();
 
     }
 
-    async startLevel() {
+    startLevel() {
         // Set up level-specific configurations
         this.enemyCount = LEVEL_CONFIG[this.level].enemyCount;
         this.timeLimit = LEVEL_CONFIG[this.level].timeLimit;
@@ -99,9 +100,6 @@ class GameController {
             clearInterval(this.gameTimer);
         }
         this.gameTimer = setInterval(this.updateTimer.bind(this), 1000);
-
-        // Initialize level
-        await playSound("introGame");
 
         // Activate player and enemies
         this.player = gameBoard.activatePlayer();
@@ -116,6 +114,8 @@ class GameController {
     }
 
     async completeLevel() {
+        stopBackgroundMusic();
+
         scoreManager.addPoints(SCORE_CONFIG.LEVEL_COMPLETION_BONUS);
         const timeTaken = this.timeLimit - this.time;
         scoreManager.addTimeBonus(timeTaken);
@@ -123,17 +123,16 @@ class GameController {
         this.player.hide();
         gameBoard.deactivateAllEnemies();
         this.enemies = [];
-        stopBackgroundMusic();
-        await playSound("introGame");
+
+        // Show the level completion screen immediately
         this.ui.levelScore.textContent = `${scoreManager.currentScore}`;
         this.ui.completeLevel.textContent = `Level ${this.level}`;
         this.ui.completeLevelDisplay.classList.remove("hidden");
 
-        // Delay before moving to the next level
-        setTimeout(() => {
-            this.nextLevel();
-        }, 3000);
+        // Play sound and wait for it to finish before proceeding
+        await playSound("introGame");
 
+        this.nextLevel();
     }
 
     nextLevel() {
@@ -178,6 +177,7 @@ class GameController {
         this.stopGame();
         this.ui.gameOverScreen.classList.add("hidden");
         this.ui.pauseScreen.classList.add("hidden");
+        gameBoard.resetBoard();
         this.startGame();
     }
 
@@ -194,10 +194,12 @@ class GameController {
     }
 
     async winGame() {
-        this.stopGame();
-        await playSound("gameWin");
-        this.ui.winScreen.classList.remove("hidden");
         stopBackgroundMusic();
+        this.stopGame();
+
+        this.ui.winScreen.classList.remove("hidden");
+
+        await playSound("gameWin");
     }
 
     updateTimer() {
