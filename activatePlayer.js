@@ -1,22 +1,24 @@
 import gameBoard from "./gameBoard.js";
 import { placeBomb, reducePlayerLives } from "./bombPlacement.js";
-import { scoreManager } from "./scores.js";
+import { SCORE_CONFIG, scoreManager } from "./scores.js";
 import { playSound, playBackgroundMusic, stopBackgroundMusic } from "./soundManager.js";
+import { LEVEL_CONFIG } from "./levelSystem.js";
+
 class GameController {
     constructor() {
-        this.defaultState = {
+        this.state = {
             isPlaying: false,
             isPaused: false,
-            score: 0,
             lives: 3,
             level: 1,
             time: 0,
-            enemyCount: 4,
+            enemyCount: LEVEL_CONFIG.enemyCount,
+            timeLimit: LEVEL_CONFIG[1].timeLimit,
             enemies: [],
             player: null,
             gameTimer: null
         };
-        Object.assign(this, this.defaultState);
+        Object.assign(this, this.state);
 
         // UI Elements
         this.ui = {
@@ -30,7 +32,10 @@ class GameController {
             winScreen: document.getElementById("game-win-screen"),
             playAgain: document.getElementById("play-again-btn"),
             gameOverRestart: document.getElementById("game-over-btn"),
-            scoreDisplay: document.getElementById("score"),
+            levelDisplay: document.getElementById("level"),
+            completeLevelDisplay: document.getElementById("complete-level-screen"),
+            completeLevel: document.getElementById("complete-level"),
+            levelScore: document.getElementById("level-score"),
             timeDisplay: document.getElementById("time"),
             livesDisplay: document.getElementById("lives"),
             levelDisplay: document.getElementById("level"),
@@ -46,8 +51,7 @@ class GameController {
     bindMethods() {
         [
             'startGame', 'updateTimer', 'handleKeyPress',
-            'pauseGame', 'resumeGame', 'restartGame',
-            'movePlayer', 'enemyDefeated',
+            'pauseGame', 'resumeGame', 'restartGame', 'enemyDefeated',
             'stopGame', 'updateUI'
         ].forEach(method => this[method] = this[method].bind(this));
     }
@@ -64,39 +68,94 @@ class GameController {
     }
 
     async startGame() {
-        
-        Object.assign(this, { ...this.defaultState, isPlaying: true });
+
+        // Clear any existing timer first
+        if (this.gameTimer) {
+            clearInterval(this.gameTimer);
+        }
+
+        // Reset game state to default
+        Object.assign(this, { ...this.state, isPlaying: true });
         scoreManager.reset();
+
+        // Hide/show appropriate screens
         this.ui.winScreen.classList.add("hidden");
         this.ui.startScreen.classList.add("hidden");
         this.ui.pauseBtn.style.display = "block";
 
-        // Start timer
-        this.gameTimer = setInterval(this.updateTimer, 1000);
+        // Start the first level
+        await this.startLevel();
 
-        gameBoard.resetBoard();
+    }
 
+    async startLevel() {
+        // Set up level-specific configurations
+        this.enemyCount = LEVEL_CONFIG[this.level].enemyCount;
+        this.timeLimit = LEVEL_CONFIG[this.level].timeLimit;
+        this.time = 0;
+
+        // Start/restart timer
+        if (this.gameTimer) {
+            clearInterval(this.gameTimer);
+        }
+        this.gameTimer = setInterval(this.updateTimer.bind(this), 1000);
+
+        // Initialize level
         await playSound("introGame");
 
         // Activate player and enemies
         this.player = gameBoard.activatePlayer();
         this.enemies = gameBoard.spawnEnemies(this.enemyCount);
 
+        // Set enemy speed for current level
+        this.enemies.forEach(enemy => enemy.setSpeed(this.level));
+
+        // Update UI and start music
         this.updateUI();
         playBackgroundMusic();
     }
 
-    enemyDefeated() {
-        if (--this.enemyCount <= 0) {
-            this.winGame();
-        }
+    async completeLevel() {
+        scoreManager.addPoints(SCORE_CONFIG.LEVEL_COMPLETION_BONUS);
+        const remainingTime = this.timeLimit - this.time;
+        scoreManager.addTimeBonus(remainingTime);
+        this.isPaused = true;
+        this.player.hide();
+        gameBoard.deactivateAllEnemies();
+        this.enemies = [];
+        stopBackgroundMusic();
+        await playSound("introGame");
+        this.ui.levelScore.textContent = `${scoreManager.currentScore}`;
+        this.ui.completeLevel.textContent = `Level ${this.level}`;
+        this.ui.completeLevelDisplay.classList.remove("hidden");
+
+        // Delay before moving to the next level
+        setTimeout(() => {
+            this.nextLevel();
+        }, 3000);
+
     }
 
-    async winGame() {
-        this.stopGame();
-        await playSound("gameWin");
-        this.ui.winScreen.classList.remove("hidden");
-        stopBackgroundMusic();
+    nextLevel() {
+        this.ui.completeLevelDisplay.classList.add("hidden");
+        // Clear current timer
+        clearInterval(this.gameTimer);
+        // Increment level
+        this.level++;
+        gameBoard.resetBoard();
+        this.isPaused = false;
+        this.startLevel();
+    }
+
+    async enemyDefeated() {
+        if (--this.enemyCount <= 0) {
+            if (this.level < 3) {
+                this.completeLevel();
+            } else {
+                scoreManager.addPoints(SCORE_CONFIG.LEVEL_COMPLETION_BONUS);
+                this.winGame();
+            }
+        }
     }
 
     pauseGame() {
@@ -134,7 +193,20 @@ class GameController {
         stopBackgroundMusic();
     }
 
+    async winGame() {
+        this.stopGame();
+        await playSound("gameWin");
+        this.ui.winScreen.classList.remove("hidden");
+        stopBackgroundMusic();
+    }
+
     updateTimer() {
+
+        if (this.time >= this.timeLimit) {
+            this.gameOver();
+            return;
+        }
+
         this.time++;
         const minutes = String(Math.floor(this.time / 60)).padStart(2, "0");
         const seconds = String(this.time % 60).padStart(2, "0");
@@ -154,28 +226,21 @@ class GameController {
         switch (event.key) {
             // case 'p': return this.isPaused ? this.resumeGame() : this.pauseGame();
             case 'ArrowUp': case 'ArrowDown': case 'ArrowLeft': case 'ArrowRight':
-                return this.movePlayer(event.key);
+                return this.player.move(event.key);
             case ' ':
                 return placeBomb();
         }
     }
 
-    movePlayer(direction) {
-        if (!this.isPlaying || this.isPaused) return;
-
-        if (this.player.move(direction)) {
-            const currentCell = this.player.getCurrentCell();
-            if (currentCell.querySelector('.enemy')) {
-                reducePlayerLives();
-                this.player.resetToStart();
-            }
-        }
-    }
 
     updateUI() {
-        this.ui.scoreDisplay.textContent = this.score;
         this.ui.livesDisplay.textContent = `Lives: ${this.lives}`;
         this.ui.levelDisplay.textContent = `Level: ${this.level}`;
+
+        const timeRemaining = this.timeLimit - this.time;
+        const minutes = String(Math.floor(timeRemaining / 60)).padStart(2, "0");
+        const seconds = String(timeRemaining % 60).padStart(2, "0");
+        this.ui.timeDisplay.textContent = `Time: ${minutes}:${seconds}`;
     }
 }
 

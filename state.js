@@ -1,5 +1,3 @@
-// boardState.js
-
 export const CELL_TYPES = {
     EMPTY: 0,
     WALL: 1,
@@ -72,7 +70,6 @@ export class BoardState {
     isPlayerSafeZone(x, y) {
         // Top-left corner (player 1)
         if (x <= 2 && y <= 2) return true;
-        // Add other safe zones as needed
         return false;
     }
 }
