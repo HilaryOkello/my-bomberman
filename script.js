@@ -1,6 +1,7 @@
 import gameBoard from "./gameBoard.js";
 import gameController from "./activatePlayer.js";
 import { checkAllEnemiesCollision, updateEnemy } from "./enemyPlacement.js";
+import { playBackgroundMusic } from "./soundManager.js";
 
 let lastRenderTime = 0;
 const FRAME_TIME = 1000 / 60; // Target 60 FPS
@@ -45,6 +46,7 @@ function updateGame() {
 
 // Initialize when the DOM is fully loaded
 document.addEventListener("DOMContentLoaded", () => {
+  playBackgroundMusic();
   gameBoard.initializeBoard();
   requestAnimationFrame(gameLoop);
 });
