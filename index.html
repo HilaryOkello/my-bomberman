@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bomberman</title>
     <link rel="stylesheet" href="style.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
 <body>
@@ -13,6 +15,17 @@
         <div class="game-name">
             <h1>Bomberman</h1>
         </div>
+        <p class="game-instructions">
+            <i class="fas fa-info-circle"></i>
+            Use 
+            <i class="fas fa-arrow-left"></i>
+            <i class="fas fa-arrow-up"></i>
+            <i class="fas fa-arrow-down"></i>
+            <i class="fas fa-arrow-right"></i>
+            keys to move and the
+            Space Bar to plant bombs
+        </p>
+
         <div class="game-header">
             <div class="score-panel">
                 <h3>Score</h3>
@@ -25,6 +38,7 @@
             </div>
             <button id="pause-btn" class="pause-button">Pause</button>
         </div>
+        
 
         <div id="game-board"></div>
 
