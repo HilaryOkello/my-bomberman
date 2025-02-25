@@ -68,7 +68,6 @@ class GameController {
     }
 
     async startGame() {
-        stopBackgroundMusic();
         // Clear any existing timer first
         if (this.gameTimer) {
             clearInterval(this.gameTimer);
@@ -124,7 +123,6 @@ class GameController {
         this.player.hide();
         gameBoard.deactivateAllEnemies();
         this.enemies = [];
-
 
         // Show the level completion screen immediately
         this.ui.levelScore.textContent = `${scoreManager.currentScore}`;
