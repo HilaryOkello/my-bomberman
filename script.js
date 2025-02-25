@@ -46,7 +46,6 @@ function updateGame() {
 
 // Initialize when the DOM is fully loaded
 document.addEventListener("DOMContentLoaded", () => {
-  playBackgroundMusic();
   gameBoard.initializeBoard();
   requestAnimationFrame(gameLoop);
 });
