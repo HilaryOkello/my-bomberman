@@ -2,6 +2,7 @@ import gameBoard from "./gameBoard.js";
 import { placeBomb, gameOver} from "./bombPlacement.js";
 import { SCORE_CONFIG, scoreManager } from "./scores.js";
 import { playSound, playBackgroundMusic, stopBackgroundMusic } from "./soundManager.js";
+import { resumeGame as resumeBomb } from "./bombPlacement.js";
 import { LEVEL_CONFIG } from "./levelSystem.js";
 
 class GameController {
@@ -16,7 +17,8 @@ class GameController {
             timeLimit: LEVEL_CONFIG[1].timeLimit,
             enemies: [],
             player: null,
-            gameTimer: null
+            gameTimer: null,
+            pendingBoardReset: false
         };
         Object.assign(this, this.state);
 
@@ -141,7 +143,7 @@ class GameController {
         clearInterval(this.gameTimer);
         // Increment level
         this.level++;
-        gameBoard.resetBoard();
+        this.pendingBoardReset = true;
         this.isPaused = false;
         this.startLevel();
     }
@@ -170,6 +172,7 @@ class GameController {
         this.isPaused = false;
         this.ui.pauseScreen.classList.add("hidden");
         this.gameTimer = setInterval(this.updateTimer, 1000);
+        resumeBomb();
         playBackgroundMusic();
     }
 
@@ -177,7 +180,7 @@ class GameController {
         this.stopGame();
         this.ui.gameOverScreen.classList.add("hidden");
         this.ui.pauseScreen.classList.add("hidden");
-        gameBoard.resetBoard();
+        this.pendingBoardReset = true;
         this.startGame();
     }
 
