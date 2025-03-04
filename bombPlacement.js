@@ -1,12 +1,24 @@
+// Updated bombPlacement.js
 import { scoreManager, SCORE_CONFIG } from './scores.js';
 import gameController from './activatePlayer.js';
 import gameBoard from './gameBoard.js';
 import { CELL_TYPES } from './state.js';
 import { playSound } from './soundManager.js';
 
+// State tracking for bombs
 let bombActive = false;
-let explosionTimeout = null;
-let cleanupTimeout = null;
+let bombTimer = 0;
+const BOMB_EXPLOSION_TIME = 1000; // 1 second in milliseconds
+const EXPLOSION_DURATION = 250; // Duration for explosion visuals
+
+// Current bomb position
+let currentBombX = 0;
+let currentBombY = 0;
+let explosionActive = false;
+let explosionTimer = 0;
+
+// Store bomb visual state to ensure it persists through pause/resume
+let bombPlaced = false;
 
 export function placeBomb() {
     if (!gameController.isPlaying || gameController.isPaused || bombActive) return;
@@ -25,19 +37,56 @@ export function placeBomb() {
     gameBoard.bombElement.style.transform = `translate(${bombX * 30}px, ${bombY * 30}px)`;
     gameBoard.bombElement.style.visibility = 'visible';
 
+    // Set bomb timer instead of using setTimeout
     bombActive = true;
+    bombPlaced = true;
+    bombTimer = 0;
+    currentBombX = bombX;
+    currentBombY = bombY;
+}
 
-    // Clear any existing timeouts
-    if (explosionTimeout) clearTimeout(explosionTimeout);
-    if (cleanupTimeout) clearTimeout(cleanupTimeout);
+// New function to update bomb state in game loop
+export function updateBombs(deltaTime) {
+    // If no bomb or explosion is active, no need to update
+    if (!bombActive && !explosionActive) return;
+    
+    // Make sure the bomb is visible if it's active
+    if (bombActive && bombPlaced) {
+        gameBoard.bombElement.style.visibility = 'visible';
+        // Update timer for active bomb
+        bombTimer += deltaTime;
+        if (bombTimer >= BOMB_EXPLOSION_TIME) {
+            explodeBomb(currentBombX, currentBombY);
+            bombActive = false;
+            bombPlaced = false;
+            explosionActive = true;
+            explosionTimer = 0;
+        }
+    }
+    
+    // Handle explosion
+    if (explosionActive) {
+        explosionTimer += deltaTime;
+        if (explosionTimer >= EXPLOSION_DURATION) {
+            cleanupExplosion();
+            explosionActive = false;
+        }
+    }
+}
 
-    explosionTimeout = setTimeout(() => {
-        explodeBomb(bombX, bombY);
-    }, 1000);
+
+// Ensure bomb is visible when game is resumed
+export function resumeGame() {
+    // Make sure bomb is visible if it was active when paused
+    if (bombActive && bombPlaced) {
+        gameBoard.bombElement.style.visibility = 'visible';
+        // Make sure the cell is still marked as a bomb
+        gameBoard.boardState.setCellType(currentBombX, currentBombY, CELL_TYPES.BOMB);
+    }
 }
 
 function explodeBomb(x, y) {
-    playSound("bombExplodes")
+    playSound("bombExplodes");
     const positions = [
         { x, y, type: 'center' },
         { x: x + 1, y, type: 'right' },
@@ -72,23 +121,13 @@ function explodeBomb(x, y) {
         checkCollisions(pos.x, pos.y);
     });
 
-    // Reset bomb visibility immediately
+    // Reset bomb visibility after explosion
     gameBoard.bombElement.style.visibility = 'hidden';
-
-    // Set cleanup timeout
-    if (cleanupTimeout) clearTimeout(cleanupTimeout);
-    cleanupTimeout = setTimeout(() => {
-        cleanupExplosion();
-    }, 250);
-
-    bombActive = false;
 }
 
 function cleanupExplosion() {
     // Reset the cell type where the bomb was
-    const bombX = parseInt(gameBoard.bombElement.style.transform.split('(')[1]) / 30;
-    const bombY = parseInt(gameBoard.bombElement.style.transform.split(', ')[1]) / 30;
-    gameBoard.boardState.setCellType(bombX, bombY, CELL_TYPES.EMPTY);
+    gameBoard.boardState.setCellType(currentBombX, currentBombY, CELL_TYPES.EMPTY);
 
     // Hide all explosion elements
     gameBoard.explosionElements.forEach(explosion => {
@@ -98,18 +137,8 @@ function cleanupExplosion() {
 
     // Reset bomb element
     gameBoard.bombElement.style.visibility = 'hidden';
-    bombActive = false;
-
-    // Clear timeouts
-    if (explosionTimeout) {
-        clearTimeout(explosionTimeout);
-        explosionTimeout = null;
-    }
-    if (cleanupTimeout) {
-        clearTimeout(cleanupTimeout);
-        cleanupTimeout = null;
-    }
 }
+
 function checkCollisions(x, y) {
     if (gameController.player.position.x === x && gameController.player.position.y === y) {
         reducePlayerLives();
