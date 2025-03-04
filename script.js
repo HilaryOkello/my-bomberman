@@ -1,7 +1,8 @@
+// Modify script.js
 import gameBoard from "./gameBoard.js";
 import gameController from "./activatePlayer.js";
 import { checkAllEnemiesCollision, updateEnemy } from "./enemyPlacement.js";
-import { playBackgroundMusic } from "./soundManager.js";
+import { updateBombs } from "./bombPlacement.js"; // Import the new function
 
 let lastRenderTime = 0;
 const FRAME_TIME = 1000 / 60; // Target 60 FPS
@@ -13,20 +14,26 @@ function gameLoop(currentTime) {
     return;
   }
 
-  const deltaTime = currentTime - lastRenderTime;
+  let deltaTime = currentTime - lastRenderTime;
+  if (deltaTime > 500) deltaTime = 16;
   lastRenderTime = currentTime;
   accumulatedTime += deltaTime;
 
+  if (gameController.pendingBoardReset) {
+    gameBoard.resetBoard();
+    gameController.pendingBoardReset = false;
+  }
+
   // Update game state
   while (accumulatedTime >= FRAME_TIME) {
-    updateGame();
+    updateGame(FRAME_TIME);
     accumulatedTime -= FRAME_TIME;
   }
 
   requestAnimationFrame(gameLoop);
 }
 
-function updateGame() {
+function updateGame(deltaTime) {
   const currentTime = performance.now();
 
   // Update enemy positions
@@ -39,6 +46,9 @@ function updateGame() {
       }
     });
   }
+
+  // Update bombs (new line)
+  updateBombs(deltaTime);
 
   // Check for collisions
   checkAllEnemiesCollision(gameController.enemies);
