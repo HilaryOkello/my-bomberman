@@ -1,5 +1,5 @@
 // enemy.js
-import { LEVEL_CONFIG } from "./levelSystem.js";
+import { LEVEL_CONFIG } from "./level.js";
 
 export class Enemy {
     constructor() {
@@ -19,15 +19,7 @@ export class Enemy {
 
     setSpeed(levelNumber) {
         this.moveDuration = LEVEL_CONFIG[levelNumber].enemySpeed;
-    }
-
-    moveStep(currentTime, speed) {
-        if (currentTime - this.lastMoveTime > speed) {
-          this.position.x += this.direction.x;
-          this.position.y += this.direction.y;
-          this.lastMoveTime = currentTime;
-        }
-    }     
+    }   
 
     createEnemyElement() {
         const enemy = document.createElement('div');
