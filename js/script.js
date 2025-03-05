@@ -9,6 +9,15 @@ const FRAME_TIME = 1000 / 60; // Target 60 FPS
 let accumulatedTime = 0;
 
 function gameLoop(currentTime) {
+  // reset the board when restarting the game or moving to the next level
+  if (gameController.pendingBoardReset) {
+    console.log("Resetting board");
+    gameBoard.resetBoard();
+    gameController.pendingBoardReset = false;
+    bomb.cleanup();
+  }
+
+  // If the game is not playing or is paused, skip updating the game state
   if (!gameController.isPlaying || gameController.isPaused) {
     requestAnimationFrame(gameLoop);
     return;
@@ -19,14 +28,7 @@ function gameLoop(currentTime) {
   lastRenderTime = currentTime;
   accumulatedTime += deltaTime;
 
-  if (gameController.pendingBoardReset) {
-    gameBoard.resetBoard();
-    gameController.pendingBoardReset = false;
-    // Cleanup any active bomb
-    bomb.cleanup();
-  }
-
-  // Update game state
+  // Update the game state
   while (accumulatedTime >= FRAME_TIME) {
     updateGame(FRAME_TIME);
     accumulatedTime -= FRAME_TIME;
