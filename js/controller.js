@@ -17,7 +17,8 @@ class GameController {
             enemies: [],
             player: null,
             gameTimer: null,
-            pendingBoardReset: false
+            pendingBoardReset: false,
+            playerMovement: null,
         };
         Object.assign(this, this.state);
 
@@ -116,7 +117,6 @@ class GameController {
 
     async completeLevel() {
         stopBackgroundMusic();
-
         scoreManager.addPoints(SCORE_CONFIG.LEVEL_COMPLETION_BONUS);
         const timeTaken = this.timeLimit - this.time;
         scoreManager.addTimeBonus(timeTaken);
@@ -219,24 +219,25 @@ class GameController {
     }
 
     handleKeyPress(event) {
-        if (!this.isPlaying) return;
+        if (!gameController.isPlaying) return;
 
         // Allow 'p' key to toggle pause/resume even when paused
         if (event.key === 'p') {
-            return this.isPaused ? this.resumeGame() : this.pauseGame();
+            return gameController.isPaused ? gameController.resumeGame() : gameController.pauseGame();
         }
 
-        if (this.isPaused) return;
-
+        if (gameController.isPaused) return;
         switch (event.key) {
-            // case 'p': return this.isPaused ? this.resumeGame() : this.pauseGame();
-            case 'ArrowUp': case 'ArrowDown': case 'ArrowLeft': case 'ArrowRight':
-                return this.player.move(event.key);
+            case 'ArrowUp':
+            case 'ArrowDown':
+            case 'ArrowLeft':
+            case 'ArrowRight':
+                this.playerMovement = event.key;
+                break;
             case ' ':
                 return placeBomb();
         }
     }
-
 
     updateUI() {
         this.ui.livesDisplay.textContent = `Lives: ${this.lives}`;
@@ -246,45 +247,46 @@ class GameController {
         const seconds = String(this.time % 60).padStart(2, "0");
         this.ui.timeDisplay.textContent = `Time: ${minutes}:${seconds}`;
     }
+
     handleBombExplosion(explosionPositions) {
         // Check if player is in explosion positions
-        const playerCollision = explosionPositions.some(pos => 
-            pos.x === this.player.position.x && 
+        const playerCollision = explosionPositions.some(pos =>
+            pos.x === this.player.position.x &&
             pos.y === this.player.position.y
         );
-    
+
         if (playerCollision) {
             this.reducePlayerLives();
             this.player.resetToStart();
         }
-    
+
         // Check enemy collisions
         this.enemies.forEach(enemy => {
-            const enemyCollision = explosionPositions.some(pos => 
-                pos.x === enemy.position.x && 
+            const enemyCollision = explosionPositions.some(pos =>
+                pos.x === enemy.position.x &&
                 pos.y === enemy.position.y
             );
-    
+
             if (enemyCollision) {
                 this.handleEnemyDefeat(enemy);
             }
         });
     }
-    
+
     reducePlayerLives() {
         let livesElement = document.getElementById('lives');
         let lives = parseInt(livesElement.innerText.split(': ')[1]);
-    
+
         if (lives > 0) {
             lives -= 1;
             livesElement.innerText = `Lives: ${lives}`;
         }
-    
+
         if (lives === 0) {
             this.gameOver();
         }
     }
-    
+
     async gameOver() {
         this.stopGame();
         if (window.collisionCheckInterval) clearInterval(window.collisionCheckInterval);
@@ -292,10 +294,10 @@ class GameController {
         await playSound("gameOver")
         document.getElementById('game-over-screen').classList.remove('hidden');
     }
-    
+
     handleEnemyDefeat(enemy) {
         enemy.element.classList.add('fade-out');
-    
+
         setTimeout(() => {
             enemy.deactivate();
             enemy.element.classList.remove('fade-out');
@@ -304,7 +306,7 @@ class GameController {
             this.enemyDefeated();
         }, 500);
     }
-    
+
 }
 
 // Export singleton instance
