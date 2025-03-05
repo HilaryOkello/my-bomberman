@@ -1,4 +1,4 @@
-import gameBoard from "./gameBoard.js";
+import gameBoard from "./board.js";
 export class Player {
     constructor() {
         this.position = { x: 1, y: 1 };

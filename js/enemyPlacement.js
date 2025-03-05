@@ -1,8 +1,7 @@
 // enemyPlacement.js
-import gameBoard from "./gameBoard.js";
-import gameController from "./activatePlayer.js";
+import gameBoard from "./board.js";
+import gameController from "./controller.js";
 import { Enemy } from './enemy.js';
-import { reducePlayerLives } from "./bombPlacement.js";
 import { CELL_TYPES } from './state.js';
 
 export function spawnEnemies(numEnemies) {
@@ -170,5 +169,5 @@ export function checkAllEnemiesCollision(enemies) {
 
 function handleCollision() {
     gameController.player.resetToStart();
-    reducePlayerLives();
+    gameController.reducePlayerLives();
 }
