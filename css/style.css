@@ -110,22 +110,22 @@ body {
 }
 
 .wall {
-  background-image: url("./images/wall.png");
+  background-image: url("../images/wall.png");
 }
 
 .breakable {
-  background-image: url("./images/breakable.png");
+  background-image: url("../images/breakable.png");
 }
 
 .empty {
-  background-image: url("./images/floor.png");
+  background-image: url("../images/floor.png");
 }
 
 .bomb {
   z-index: 10;
   width: var(--cell-size);
   height: var(--cell-size);
-  background-image: url("./images/bomb.png");
+  background-image: url("../images/bomb.png");
 }
 
 .explosion {
@@ -139,17 +139,17 @@ body {
 }
 
 .explosion-center {
-  background-image: url('./images/explosion_base.png');
+  background-image: url('../images/explosion_base.png');
 }
 
 .explosion-right,
 .explosion-left {
-  background-image: url('./images/explosion_horizontal.png');
+  background-image: url('../images/explosion_horizontal.png');
 }
 
 .explosion-up,
 .explosion-down {
-  background-image: url('./images/explosion_vertical.png');
+  background-image: url('../images/explosion_vertical.png');
 }
 
 /* Remove the explode animation temporarily for debugging */
@@ -165,7 +165,7 @@ body::after {
   height: 0;
   overflow: hidden;
   z-index: -1;
-  content: url("./images/wall.png") url("./images/breakable.png") url("./images/floor.png") url("./images/bomb.png") url("./images/enemy.png") url("./images/explosion_base.png") url("./images/explosion_horizontal.png") url("./images/explosion_vertical.png");
+  content: url("../images/wall.png") url("../images/breakable.png") url("../images/floor.png") url("../images/bomb.png") url("../images/enemy.png") url("../images/explosion_base.png") url("../images/explosion_horizontal.png") url("../images/explosion_vertical.png");
 }
 
 .game-instructions {
@@ -211,7 +211,7 @@ body::after {
   width: 25px;
   height: 25px;
   position: absolute;
-  background-image: url('./images/enemy.png');
+  background-image: url('../images/enemy.png');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;

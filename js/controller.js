@@ -1,8 +1,8 @@
-import gameBoard from "./gameBoard.js";
-import { placeBomb, gameOver} from "./bombPlacement.js";
+import gameBoard from "./board.js";
 import { SCORE_CONFIG, scoreManager } from "./scores.js";
-import { playSound, playBackgroundMusic, stopBackgroundMusic } from "./soundManager.js";
-import { LEVEL_CONFIG } from "./levelSystem.js";
+import { playSound, playBackgroundMusic, stopBackgroundMusic } from "./sound.js";
+import { placeBomb, bomb } from './bomb.js';
+import { LEVEL_CONFIG } from "./level.js";
 
 class GameController {
     constructor() {
@@ -16,7 +16,9 @@ class GameController {
             timeLimit: LEVEL_CONFIG[1].timeLimit,
             enemies: [],
             player: null,
-            gameTimer: null
+            gameTimer: null,
+            pendingBoardReset: false,
+            playerMovement: null,
         };
         Object.assign(this, this.state);
 
@@ -115,7 +117,6 @@ class GameController {
 
     async completeLevel() {
         stopBackgroundMusic();
-
         scoreManager.addPoints(SCORE_CONFIG.LEVEL_COMPLETION_BONUS);
         const timeTaken = this.timeLimit - this.time;
         scoreManager.addTimeBonus(timeTaken);
@@ -141,7 +142,7 @@ class GameController {
         clearInterval(this.gameTimer);
         // Increment level
         this.level++;
-        gameBoard.resetBoard();
+        this.pendingBoardReset = true;
         this.isPaused = false;
         this.startLevel();
     }
@@ -170,6 +171,7 @@ class GameController {
         this.isPaused = false;
         this.ui.pauseScreen.classList.add("hidden");
         this.gameTimer = setInterval(this.updateTimer, 1000);
+        bomb.resume();
         playBackgroundMusic();
     }
 
@@ -177,7 +179,7 @@ class GameController {
         this.stopGame();
         this.ui.gameOverScreen.classList.add("hidden");
         this.ui.pauseScreen.classList.add("hidden");
-        gameBoard.resetBoard();
+        this.pendingBoardReset = true;
         this.startGame();
     }
 
@@ -217,24 +219,25 @@ class GameController {
     }
 
     handleKeyPress(event) {
-        if (!this.isPlaying) return;
+        if (!gameController.isPlaying) return;
 
         // Allow 'p' key to toggle pause/resume even when paused
         if (event.key === 'p') {
-            return this.isPaused ? this.resumeGame() : this.pauseGame();
+            return gameController.isPaused ? gameController.resumeGame() : gameController.pauseGame();
         }
 
-        if (this.isPaused) return;
-
+        if (gameController.isPaused) return;
         switch (event.key) {
-            // case 'p': return this.isPaused ? this.resumeGame() : this.pauseGame();
-            case 'ArrowUp': case 'ArrowDown': case 'ArrowLeft': case 'ArrowRight':
-                return this.player.move(event.key);
+            case 'ArrowUp':
+            case 'ArrowDown':
+            case 'ArrowLeft':
+            case 'ArrowRight':
+                this.playerMovement = event.key;
+                break;
             case ' ':
                 return placeBomb();
         }
     }
-
 
     updateUI() {
         this.ui.livesDisplay.textContent = `Lives: ${this.lives}`;
@@ -244,6 +247,66 @@ class GameController {
         const seconds = String(this.time % 60).padStart(2, "0");
         this.ui.timeDisplay.textContent = `Time: ${minutes}:${seconds}`;
     }
+
+    handleBombExplosion(explosionPositions) {
+        // Check if player is in explosion positions
+        const playerCollision = explosionPositions.some(pos =>
+            pos.x === this.player.position.x &&
+            pos.y === this.player.position.y
+        );
+
+        if (playerCollision) {
+            this.reducePlayerLives();
+            this.player.resetToStart();
+        }
+
+        // Check enemy collisions
+        this.enemies.forEach(enemy => {
+            const enemyCollision = explosionPositions.some(pos =>
+                pos.x === enemy.position.x &&
+                pos.y === enemy.position.y
+            );
+
+            if (enemyCollision) {
+                this.handleEnemyDefeat(enemy);
+            }
+        });
+    }
+
+    reducePlayerLives() {
+        let livesElement = document.getElementById('lives');
+        let lives = parseInt(livesElement.innerText.split(': ')[1]);
+
+        if (lives > 0) {
+            lives -= 1;
+            livesElement.innerText = `Lives: ${lives}`;
+        }
+
+        if (lives === 0) {
+            this.gameOver();
+        }
+    }
+
+    async gameOver() {
+        this.stopGame();
+        if (window.collisionCheckInterval) clearInterval(window.collisionCheckInterval);
+        if (window.enemyMoveInterval) clearInterval(window.enemyMoveInterval);
+        await playSound("gameOver")
+        document.getElementById('game-over-screen').classList.remove('hidden');
+    }
+
+    handleEnemyDefeat(enemy) {
+        enemy.element.classList.add('fade-out');
+
+        setTimeout(() => {
+            enemy.deactivate();
+            enemy.element.classList.remove('fade-out');
+            this.enemies = this.enemies.filter(e => e !== enemy);
+            scoreManager.addPoints(SCORE_CONFIG.ENEMY_DEFEATED);
+            this.enemyDefeated();
+        }, 500);
+    }
+
 }
 
 // Export singleton instance
