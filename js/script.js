@@ -11,7 +11,6 @@ let accumulatedTime = 0;
 function gameLoop(currentTime) {
   // reset the board when restarting the game or moving to the next level
   if (gameController.pendingBoardReset) {
-    console.log("Resetting board");
     gameBoard.resetBoard();
     gameController.pendingBoardReset = false;
     bomb.cleanup();
@@ -39,6 +38,11 @@ function gameLoop(currentTime) {
 
 function updateGame(deltaTime) {
   const currentTime = performance.now();
+
+  if (gameController.playerMovement) {
+    gameController.player.move(gameController.playerMovement);
+    gameController.playerMovement = null;
+  }
 
   // Update enemy positions
   if (gameController.enemies) {
