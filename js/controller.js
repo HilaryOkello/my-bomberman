@@ -207,7 +207,7 @@ class GameController {
     updateTimer() {
 
         if (this.time <= 0) {
-            gameOver();
+            this.gameOver();
             clearInterval(this.gameTimer);
             return;
         }
@@ -293,6 +293,7 @@ class GameController {
         if (window.enemyMoveInterval) clearInterval(window.enemyMoveInterval);
         await playSound("gameOver")
         document.getElementById('game-over-screen').classList.remove('hidden');
+        bomb.cleanup();
     }
 
     handleEnemyDefeat(enemy) {
