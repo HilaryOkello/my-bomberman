@@ -31,7 +31,7 @@ Arrow Keys: Move the player `up`, `down`, `left`, or `right`.
 1. Clone the repository:
 
 ```sh
-git clone https://learn.zone01kisumu.ke/git/hilaokello/make-your-game.git
+git clone https://github.com/HilaryOkello/my-bomberman.git
 ```
 2. Navigate into the project folder:
 ```sh
